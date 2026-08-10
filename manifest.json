@@ -1,0 +1,14 @@
+{
+  "name": "Sanjeev Di Hatti",
+  "short_name": "Sanjeev Di Hatti",
+  "description": "Stock and billing for Sanjeev Di Hatti \u2014 track quantities across sections and bill customers.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#12171C",
+  "theme_color": "#12171C",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

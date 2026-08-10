@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#12171C" />
+<title>Sanjeev Di Hatti — Stockroom</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+  :root{
+    --bg:#12171C; --surface:#1A2129; --surface2:#212B34; --border:#2A333C;
+    --text:#EDF0F2; --muted:#8D98A3; --amber:#E3A73C; --teal:#3FA98A; --rust:#D2604A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent; padding-bottom:24px;}
+  button,input{font-family:inherit;}
+  .header{padding:24px 16px 16px;background:var(--surface);border-bottom:0.5px solid var(--border);}
+  .header-top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .brand-mark{width:36px;height:36px;border-radius:8px;background:var(--amber);color:#241A05;
+    display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;
+    font-weight:600;font-size:14px;letter-spacing:.5px;}
+  .brand-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.8px;text-transform:uppercase;}
+  .brand-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+  .stats-row{display:flex;gap:8px;}
+  .stat{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface2);
+    border:0.5px solid var(--border);border-radius:10px;padding:8px 10px;}
+  .stat-value{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:15px;line-height:1;}
+  .stat-label{font-size:10.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+  .search-row{display:flex;align-items:center;gap:8px;margin:14px 16px 6px;padding:9px 12px;
+    background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;}
+  .search-row input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;}
+  .sections-wrap{padding:10px 16px 20px;display:flex;flex-direction:column;gap:12px;}
+  .section-card{display:flex;background:var(--surface);border:0.5px solid var(--border);
+    border-radius:12px;overflow:hidden;}
+  .tab{width:5px;flex-shrink:0;}
+  .section-inner{flex:1;min-width:0;}
+  .section-header{width:100%;display:flex;align-items:center;gap:8px;background:transparent;
+    border:none;cursor:pointer;padding:13px 12px;text-align:left;color:var(--text);}
+  .section-title{font-family:'Oswald',sans-serif;font-weight:500;font-size:15px;letter-spacing:.3px;}
+  .section-count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);
+    background:var(--surface2);border-radius:6px;padding:1px 6px;}
+  .low-badge{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--rust);
+    background:rgba(210,96,74,.1);border-radius:6px;padding:2px 6px;}
+  .section-body{border-top:0.5px solid var(--border);padding:2px 0;}
+  .empty-products{padding:16px 14px;font-size:12.5px;color:var(--muted);}
+  .product-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:0.5px solid var(--border);}
+  .product-row:last-child{border-bottom:none;}
+  .product-name{font-size:13.5px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .product-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+  .mini-tag{border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:500;}
+  .qty-group{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .qty-btn{width:24px;height:24px;border-radius:6px;border:0.5px solid var(--border);
+    background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;}
+  .qty-tag{min-width:48px;display:flex;flex-direction:column;align-items:center;
+    border:0.5px solid var(--border);border-radius:6px;padding:2px 6px;}
+  .qty-num{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;line-height:1.1;}
+  .qty-unit{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
+  .row-actions{display:flex;gap:2px;flex-shrink:0;}
+  .icon-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;cursor:pointer;border-radius:6px;color:var(--muted);font-size:14px;}
+  .add-item-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;
+    cursor:pointer;color:var(--amber);font-size:12.5px;font-weight:500;padding:10px 14px;}
+  .add-section-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);
+    border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px;padding:12px;
+    cursor:pointer;width:100%;}
+  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:14px;}
+  .form-label{font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+  .text-input{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;
+    padding:9px 10px;color:var(--text);font-size:13.5px;outline:none;}
+  .swatch-row{display:flex;gap:10px;}
+  .swatch{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+  .inline-form{padding:10px 14px 14px;border-top:0.5px solid var(--border);}
+  .btn-ghost{background:transparent;border:0.5px solid var(--border);color:var(--muted);border-radius:8px;
+    padding:8px 14px;font-size:12.5px;cursor:pointer;}
+  .btn-primary{display:flex;align-items:center;gap:6px;background:var(--amber);border:none;color:#241A05;
+    border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .btn-danger{background:var(--rust);border:none;color:#2A0D07;border-radius:8px;padding:8px 14px;
+    font-size:12.5px;font-weight:600;cursor:pointer;}
+  .empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--surface);
+    border:0.5px solid var(--border);border-radius:12px;padding:28px 20px;}
+  .empty-icon{width:44px;height:44px;border-radius:50%;background:var(--surface2);display:flex;
+    align-items:center;justify-content:center;margin-bottom:12px;font-size:20px;}
+  .empty-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin-bottom:4px;}
+  .empty-body{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5;max-width:260px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
+    justify-content:center;z-index:50;padding:20px;}
+  .modal{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px;
+    width:100%;max-width:320px;}
+  .modal-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin-bottom:6px;}
+  .modal-body{font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .search-meta{font-size:11.5px;color:var(--muted);padding:4px 2px 8px;text-transform:uppercase;letter-spacing:.4px;}
+  .toolbar{display:flex;align-items:center;gap:8px;margin:0 16px 4px;}
+  .chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:0.5px solid var(--border);
+    border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;}
+  .chip.active{color:var(--rust);border-color:var(--rust);background:rgba(210,96,74,.1);}
+  select.text-input{-webkit-appearance:none;appearance:none;}
+  .toolbar select{background:var(--surface2);border:0.5px solid var(--border);border-radius:999px;
+    color:var(--muted);font-size:12px;padding:6px 10px;outline:none;}
+  .menu-btn{margin-left:auto;width:30px;height:30px;border-radius:8px;border:0.5px solid var(--border);
+    background:var(--surface2);color:var(--muted);cursor:pointer;font-size:15px;}
+  .chart-wrap{margin:12px 16px 2px;background:var(--surface);border:0.5px solid var(--border);
+    border-radius:12px;padding:12px 14px;}
+  .chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
+  .chart-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .chart-row:last-child{margin-bottom:0;}
+  .chart-label{width:74px;flex-shrink:0;font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .chart-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+  .chart-fill{height:100%;border-radius:4px;}
+  .chart-num{width:22px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
+  .panel-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:12px 0;border-bottom:0.5px solid var(--border);}
+  .panel-row:last-child{border-bottom:none;}
+  .panel-row-text{flex:1;}
+  .panel-row-title{font-size:13px;color:var(--text);margin-bottom:2px;}
+  .panel-row-sub{font-size:11px;color:var(--muted);line-height:1.4;}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);
+    border:0.5px solid var(--border);color:var(--text);font-size:12.5px;padding:9px 16px;border-radius:999px;
+    z-index:100;}
+  .nav-row{display:flex;gap:6px;padding:12px 16px 0;}
+  .nav-btn{flex:1;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
+    border-radius:8px;padding:8px 0;font-size:12.5px;font-weight:500;cursor:pointer;}
+  .nav-btn.active{background:var(--amber);border-color:var(--amber);color:#241A05;}
+  .bill-wrap{padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;}
+  .price-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);}
+  .cart-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+  .cart-row:last-child{border-bottom:none;}
+  .cart-name{font-size:13px;margin-bottom:2px;}
+  .cart-sub{font-size:11px;color:var(--muted);}
+  .cart-qty-input{width:46px;background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;
+    color:var(--text);font-size:13px;text-align:center;padding:5px 0;}
+  .cart-line-total{width:64px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;flex-shrink:0;}
+  .pick-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
+  .pick-row:last-child{border-bottom:none;}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;
+    border-top:0.5px solid var(--border);margin-top:4px;}
+  .total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .total-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:500;color:var(--amber);}
+  .bill-list-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
+    border-bottom:0.5px solid var(--border);cursor:pointer;}
+  .bill-list-row:last-child{border-bottom:none;}
+  .bill-list-date{font-size:12.5px;}
+  .bill-list-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .bill-list-total{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);}
+  .shop-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.5px;
+    color:var(--amber);margin-bottom:10px;}
+</style>
+</head>
+<body>
+  <div id="app"></div>
+
+<script>
+/* CLOUD_SYNC — how to share stock across multiple phones
+   This app works fully offline using the device's local storage. To make two or
+   more phones see the same stock in real time, you need a small free backend —
+   there is no way around that for a static app. The easiest option:
+
+   1. Go to https://console.firebase.google.com, create a free project.
+   2. Enable "Firestore Database" (start in test mode for a quick trial).
+   3. Project settings > add a Web app > copy the firebaseConfig object.
+   4. Add these two script tags right before this <script> tag:
+        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+   5. Paste your config below, set CLOUD_SYNC.enabled = true, and replace
+      saveData()/loadData() calls with reads/writes to a Firestore document
+      (e.g. db.collection("stores").doc("my-store")) instead of localStorage.
+   Ask your assistant to wire this up for you once you have a config — it's a
+   contained change, just needs your real Firebase keys to test against. */
+const CLOUD_SYNC = { enabled: false, firebaseConfig: null };
+
+const STORAGE_KEY = "stockroom:data:v1";
+const TAB_COLORS = ["#E3A73C","#3FA98A","#D2604A","#4E8FD0","#9A80D6","#A6B24A"];
+const CURRENCY = "₹";
+const SHOP_NAME = "Sanjeev Di Hatti";
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      parsed.bills = parsed.bills || [];
+      parsed.sections = (parsed.sections||[]).map(s=>({...s, products:(s.products||[]).map(p=>({price:0, ...p}))}));
+      return parsed;
+    }
+  }catch(e){}
+  return { sections: [], bills: [] };
+}
+function saveData(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }catch(e){}
+}
+
+const state = {
+  data: loadData(),
+  search: "",
+  expanded: {},
+  showAddSection: false,
+  sectionName: "",
+  sectionColor: TAB_COLORS[0],
+  addingTo: null,
+  editing: null,
+  form: { name:"", qty:"", unit:"pcs", threshold:"5", price:"0" },
+  confirmDelete: null,
+  sortBy: "name",
+  lowOnly: false,
+  showDataPanel: false,
+  toast: null,
+  view: "stock",
+  cart: [],
+  billCustomer: "",
+  billPhone: "",
+  billPicker: "",
+  activeBillId: null,
+};
+
+function sortProducts(list){
+  const arr = list.slice();
+  if(state.sortBy === "qtyAsc") arr.sort((a,b)=>a.qty-b.qty);
+  else if(state.sortBy === "qtyDesc") arr.sort((a,b)=>b.qty-a.qty);
+  else arr.sort((a,b)=>a.name.localeCompare(b.name));
+  return arr;
+}
+function filterLow(list){ return state.lowOnly ? list.filter(p=>p.qty<=p.threshold) : list; }
+function showToast(msg){ state.toast = msg; render(); setTimeout(()=>{ state.toast=null; render(); }, 2200); }
+
+function el(tag, attrs, ...children){
+  const e = document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k === "text") e.textContent = attrs[k];
+    else if(k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+    else if(k === "class") e.className = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  children.flat().forEach(c => { if(c!=null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return e;
+}
+
+function render(){
+  const root = document.getElementById("app");
+  root.innerHTML = "";
+  root.appendChild(buildHeader());
+  root.appendChild(buildNav());
+
+  if(state.view === "billing"){ root.appendChild(buildBillingView()); }
+  else if(state.view === "history"){ root.appendChild(buildHistoryView()); }
+  else { root.appendChild(buildStockView()); }
+
+  if(state.confirmDelete){
+    root.appendChild(buildConfirmModal());
+  }
+  if(state.showDataPanel){
+    root.appendChild(buildDataPanel());
+  }
+  if(state.toast){
+    root.appendChild(el("div",{class:"toast", text:state.toast}));
+  }
+}
+
+function buildNav(){
+  const nav = el("div",{class:"nav-row"});
+  [["stock","Stock"],["billing","Billing"],["history","History"]].forEach(([v,l])=>{
+    nav.appendChild(el("button",{class:"nav-btn"+(state.view===v?" active":""), onclick:()=>{ state.view=v; render(); }, text:l}));
+  });
+  return nav;
+}
+
+function buildStockView(){
+  const frag = el("div",{});
+
+  const searchRow = el("div", {class:"search-row"});
+  const searchInput = el("input", {placeholder:"Search stock…", value: state.search,
+    oninput: (e)=>{ state.search = e.target.value; render(); }});
+  searchRow.append("🔍", searchInput);
+  if(state.search) searchRow.append(el("button",{class:"icon-btn", onclick:()=>{state.search="";render();}, text:"✕"}));
+  frag.appendChild(searchRow);
+
+  const toolbar = el("div",{class:"toolbar"});
+  const lowChip = el("button",{class:"chip"+(state.lowOnly?" active":""), onclick:()=>{state.lowOnly=!state.lowOnly; render();}, text:"⚠ Low stock only"});
+  const sortSelect = el("select",{onchange:(e)=>{ state.sortBy=e.target.value; render(); }});
+  [["name","Name A–Z"],["qtyAsc","Qty: low to high"],["qtyDesc","Qty: high to low"]].forEach(([v,l])=>{
+    const opt = el("option",{value:v, text:l});
+    if(state.sortBy===v) opt.setAttribute("selected","selected");
+    sortSelect.appendChild(opt);
+  });
+  const menuBtn = el("button",{class:"menu-btn", onclick:()=>{ state.showDataPanel=true; render(); }, text:"⋮"});
+  toolbar.append(lowChip, sortSelect, menuBtn);
+  frag.appendChild(toolbar);
+
+  if(!state.search.trim() && state.data.sections.length > 0){
+    frag.appendChild(buildChart());
+  }
+
+  const wrap = el("div", {class:"sections-wrap"});
+
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    const all = state.data.sections.flatMap(s => s.products.map(p => ({...p, sectionId:s.id, sectionName:s.name, sectionColor:s.color})));
+    const results = sortProducts(filterLow(all.filter(p => p.name.toLowerCase().includes(q))));
+    wrap.appendChild(el("div",{class:"search-meta", text:`${results.length} result${results.length===1?"":"s"}`}));
+    if(results.length === 0){
+      wrap.appendChild(buildEmptyState("🔍","No matches",`Nothing in your stockroom matches "${state.search}".`));
+    } else {
+      const card = el("div",{class:"card", style:"padding:0"});
+      results.forEach((p,i)=> card.appendChild(buildProductRow(p, i===results.length-1, p.sectionId, p.sectionName, p.sectionColor)));
+      wrap.appendChild(card);
+    }
+  } else {
+    if(state.data.sections.length===0 && !state.showAddSection){
+      wrap.appendChild(buildEmptyState("📦","No sections yet","Sections are the shelves of your stockroom. Add one to start tracking stock.","Add your first section", ()=>{state.showAddSection=true; render();}));
+    }
+    state.data.sections.forEach(section => wrap.appendChild(buildSection(section)));
+
+    if(state.showAddSection){
+      wrap.appendChild(buildAddSectionCard());
+    } else if(state.data.sections.length > 0){
+      wrap.appendChild(el("button",{class:"add-section-btn", onclick:()=>{state.showAddSection=true; render();}, text:"+ New section"}));
+    }
+  }
+
+  frag.appendChild(wrap);
+  return frag;
+}
+
+function allProductsFlat(){
+  return state.data.sections.flatMap(s => s.products.map(p => ({...p, sectionId:s.id, sectionName:s.name, sectionColor:s.color})));
+}
+
+function buildBillingView(){
+  const wrap = el("div",{class:"bill-wrap"});
+
+  wrap.appendChild(el("div",{class:"shop-name", text:SHOP_NAME}));
+
+  wrap.appendChild(el("div",{class:"form-label", text:"Customer name"}));
+  wrap.appendChild(el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
+    oninput:(e)=>{ state.billCustomer = e.target.value; }}));
+
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Customer phone"}));
+  wrap.appendChild(el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
+    oninput:(e)=>{ state.billPhone = e.target.value; }}));
+
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add item to bill"}));
+  const pickWrap = el("div",{class:"search-row", style:"margin:0"});
+  const pickInput = el("input",{placeholder:"Search stock to bill…", value: state.billPicker,
+    oninput:(e)=>{ state.billPicker = e.target.value; render(); }});
+  pickWrap.append("🔍", pickInput);
+  wrap.appendChild(pickWrap);
+
+  if(state.billPicker.trim()){
+    const q = state.billPicker.trim().toLowerCase();
+    const matches = allProductsFlat().filter(p => p.name.toLowerCase().includes(q)).slice(0,8);
+    const card = el("div",{class:"card", style:"padding:0 14px"});
+    if(matches.length === 0){
+      card.appendChild(el("div",{class:"empty-products", text:"No stock items match."}));
+    } else {
+      matches.forEach((p,i)=>{
+        const row = el("div",{class:"pick-row", style: i===matches.length-1 ? "border-bottom:none" : "", onclick:()=>addToCart(p)});
+        row.appendChild(el("div",{style:"flex:1;min-width:0"},
+          el("div",{class:"cart-name", text:p.name}),
+          el("div",{class:"cart-sub", text:`${p.sectionName} · ${p.qty} ${p.unit} in stock · ${CURRENCY}${p.price||0}`})
+        ));
+        row.appendChild(el("span",{class:"icon-btn", text:"+"}));
+        card.appendChild(row);
+      });
+    }
+    wrap.appendChild(card);
+  }
+
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:`Bill (${state.cart.length})`}));
+  if(state.cart.length === 0){
+    wrap.appendChild(buildEmptyState("🧾","No items yet","Search stock above and tap an item to add it to this bill."));
+  } else {
+    const card = el("div",{class:"card"});
+    state.cart.forEach((c,i)=>{
+      const row = el("div",{class:"cart-row"});
+      row.appendChild(el("div",{style:"flex:1;min-width:0"},
+        el("div",{class:"cart-name", text:c.name}),
+        el("div",{class:"cart-sub", text:`${CURRENCY}${c.price} / ${c.unit} · ${c.stockQty} in stock`})
+      ));
+      row.appendChild(el("input",{class:"cart-qty-input", type:"number", inputmode:"numeric", value:String(c.qty),
+        oninput:(e)=>{ setCartQty(i, e.target.value); }}));
+      row.appendChild(el("div",{class:"cart-line-total", text:`${CURRENCY}${(c.qty*c.price).toFixed(2)}`}));
+      row.appendChild(el("button",{class:"icon-btn", onclick:()=>removeFromCart(i), text:"✕"}));
+      card.appendChild(row);
+    });
+    const total = cartTotal();
+    const totalRow = el("div",{class:"total-row"});
+    totalRow.appendChild(el("div",{class:"total-label", text:"Total"}));
+    totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${total.toFixed(2)}`}));
+    card.appendChild(totalRow);
+    wrap.appendChild(card);
+
+    wrap.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate bill & update stock"}));
+  }
+
+  return wrap;
+}
+
+function buildHistoryView(){
+  const wrap = el("div",{class:"bill-wrap"});
+  const bills = (state.data.bills||[]).slice().sort((a,b)=>b.createdAt-a.createdAt);
+
+  if(state.activeBillId){
+    const bill = bills.find(b=>b.id===state.activeBillId) || (state.data.bills||[]).find(b=>b.id===state.activeBillId);
+    if(bill) return buildBillDetail(bill);
+    state.activeBillId = null;
+  }
+
+  if(bills.length === 0){
+    wrap.appendChild(buildEmptyState("🧾","No bills yet","Bills you generate will show up here with a full receipt."));
+    return wrap;
+  }
+  const card = el("div",{class:"card", style:"padding:0"});
+  bills.forEach((b,i)=>{
+    const row = el("div",{class:"bill-list-row", style: i===bills.length-1 ? "border-bottom:none":"", onclick:()=>{ state.activeBillId=b.id; render(); }});
+    row.appendChild(el("div",{},
+      el("div",{class:"bill-list-date", text: new Date(b.createdAt).toLocaleString()}),
+      el("div",{class:"bill-list-sub", text: `${b.customer || "Walk-in customer"}${b.phone ? " · "+b.phone : ""} · ${b.items.length} item${b.items.length===1?"":"s"}`})
+    ));
+    row.appendChild(el("div",{class:"bill-list-total", text:`${CURRENCY}${b.total.toFixed(2)}`}));
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function buildBillDetail(bill){
+  const wrap = el("div",{class:"bill-wrap"});
+  wrap.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.activeBillId=null; render(); }, text:"← Back to history"}));
+  const card = el("div",{class:"card"});
+  card.appendChild(el("div",{class:"shop-name", style:"margin-bottom:2px", text:SHOP_NAME}));
+  card.appendChild(el("div",{class:"panel-row-sub", text: new Date(bill.createdAt).toLocaleString()}));
+  card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: bill.customer || "Walk-in customer"}));
+  if(bill.phone) card.appendChild(el("div",{class:"panel-row-sub", text: bill.phone}));
+  const itemsWrap = el("div",{style:"margin-top:12px;border-top:0.5px solid var(--border)"});
+  bill.items.forEach(it=>{
+    const row = el("div",{class:"cart-row"});
+    row.appendChild(el("div",{style:"flex:1;min-width:0"},
+      el("div",{class:"cart-name", text:it.name}),
+      el("div",{class:"cart-sub", text:`${it.qty} ${it.unit} × ${CURRENCY}${it.price}`})
+    ));
+    row.appendChild(el("div",{class:"cart-line-total", text:`${CURRENCY}${(it.qty*it.price).toFixed(2)}`}));
+    itemsWrap.appendChild(row);
+  });
+  card.appendChild(itemsWrap);
+  const totalRow = el("div",{class:"total-row"});
+  totalRow.appendChild(el("div",{class:"total-label", text:"Total"}));
+  totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${bill.total.toFixed(2)}`}));
+  card.appendChild(totalRow);
+  wrap.appendChild(card);
+  wrap.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"Print / Save as PDF"}));
+  return wrap;
+}
+
+function addToCart(product){
+  state.billPicker = "";
+  const existing = state.cart.find(c=>c.productId===product.id);
+  if(existing){ existing.qty += 1; }
+  else {
+    state.cart.push({
+      productId: product.id, sectionId: product.sectionId, name: product.name,
+      unit: product.unit, price: product.price||0, qty: 1, stockQty: product.qty,
+    });
+  }
+  render();
+}
+function setCartQty(index, value){
+  const qty = Math.max(1, Math.round(Number(value)||1));
+  state.cart[index].qty = qty;
+  render();
+}
+function removeFromCart(index){
+  state.cart.splice(index,1);
+  render();
+}
+function cartTotal(){
+  return state.cart.reduce((sum,c)=> sum + c.qty*c.price, 0);
+}
+function generateBill(){
+  if(state.cart.length === 0) return;
+  for(const c of state.cart){
+    if(c.qty > c.stockQty){
+      showToast(`Not enough "${c.name}" in stock (${c.stockQty} left)`);
+      return;
+    }
+  }
+  const items = state.cart.map(c=>({ name:c.name, unit:c.unit, price:c.price, qty:c.qty }));
+  const bill = { id: uid(), createdAt: Date.now(), customer: state.billCustomer.trim(), phone: state.billPhone.trim(), items, total: cartTotal() };
+
+  state.cart.forEach(c=>{
+    const section = state.data.sections.find(s=>s.id===c.sectionId);
+    const prod = section && section.products.find(p=>p.id===c.productId);
+    if(prod) prod.qty = Math.max(0, prod.qty - c.qty);
+  });
+
+  state.data.bills = state.data.bills || [];
+  state.data.bills.push(bill);
+  saveData();
+
+  state.cart = [];
+  state.billCustomer = "";
+  state.billPhone = "";
+  state.activeBillId = bill.id;
+  state.view = "history";
+  showToast("Bill generated — stock updated");
+}
+function printBill(bill){
+  const win = window.open("", "_blank");
+  const rows = bill.items.map(it=>
+    `<tr><td>${it.name}</td><td style="text-align:center">${it.qty} ${it.unit}</td><td style="text-align:right">${CURRENCY}${it.price}</td><td style="text-align:right">${CURRENCY}${(it.qty*it.price).toFixed(2)}</td></tr>`
+  ).join("");
+  win.document.write(`
+    <html><head><title>Receipt — ${SHOP_NAME}</title><style>
+      body{font-family:sans-serif;padding:24px;color:#111;}
+      table{width:100%;border-collapse:collapse;margin-top:16px;}
+      th,td{padding:6px 4px;border-bottom:1px solid #ddd;font-size:13px;text-align:left;}
+      h1{margin:0 0 2px;font-size:20px;} h2{margin:0 0 4px;font-size:14px;color:#555;font-weight:normal;}
+      .muted{color:#666;font-size:12px;}
+      .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
+    </style></head><body>
+      <h1>${SHOP_NAME}</h1>
+      <h2>Receipt</h2>
+      <div class="muted">${new Date(bill.createdAt).toLocaleString()}</div>
+      <div class="muted">${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
+      <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line total</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <div class="total">Total: ${CURRENCY}${bill.total.toFixed(2)}</div>
+    </body></html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function buildChart(){
+  const wrap = el("div",{class:"chart-wrap"});
+  wrap.appendChild(el("div",{class:"chart-title", text:"Overview by section"}));
+  const maxCount = Math.max(1, ...state.data.sections.map(s=>s.products.length));
+  state.data.sections.forEach(s=>{
+    const row = el("div",{class:"chart-row"});
+    row.appendChild(el("div",{class:"chart-label", text:s.name}));
+    const track = el("div",{class:"chart-track"});
+    const pct = Math.round((s.products.length / maxCount) * 100);
+    track.appendChild(el("div",{class:"chart-fill", style:`width:${pct}%;background:${s.color}`}));
+    row.append(track, el("div",{class:"chart-num", text:String(s.products.length)}));
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+
+function buildHeader(){
+  const all = state.data.sections.flatMap(s=>s.products);
+  const totalItems = all.length;
+  const lowCount = all.filter(p=>p.qty<=p.threshold).length;
+  const header = el("div",{class:"header"});
+  const top = el("div",{class:"header-top"},
+    el("div",{class:"brand-mark", text:"SD"}),
+    el("div",{},
+      el("div",{class:"brand-title", text:SHOP_NAME}),
+      el("div",{class:"brand-sub", text:"stock & billing"})
+    )
+  );
+  const stats = el("div",{class:"stats-row"},
+    buildStat("Sections", state.data.sections.length, false),
+    buildStat("Items", totalItems, false),
+    buildStat("Low stock", lowCount, lowCount>0)
+  );
+  header.append(top, stats);
+  return header;
+}
+function buildStat(label, value, alert){
+  const s = el("div",{class:"stat", style: alert ? `border-color:var(--rust)`:""});
+  const valEl = el("div",{class:"stat-value", text:String(value)});
+  if(alert) valEl.style.color = "var(--rust)";
+  s.append(valEl, el("div",{class:"stat-label", text:label}));
+  return s;
+}
+
+function buildSection(section){
+  const lowCount = section.products.filter(p=>p.qty<=p.threshold).length;
+  const card = el("div",{class:"section-card"});
+  card.appendChild(el("div",{class:"tab", style:`background:${section.color}`}));
+  const inner = el("div",{class:"section-inner"});
+  const headerBtn = el("button",{class:"section-header", onclick:()=>{ state.expanded[section.id]=!state.expanded[section.id]; render(); }});
+  headerBtn.append(
+    state.expanded[section.id] ? "▾" : "▸",
+    el("span",{class:"section-title", text:section.name}),
+    el("span",{class:"section-count", text:String(section.products.length)})
+  );
+  if(lowCount>0) headerBtn.appendChild(el("span",{class:"low-badge", text:`⚠ ${lowCount}`}));
+  headerBtn.appendChild(el("span",{style:"flex:1"}));
+  headerBtn.appendChild(el("span",{class:"icon-btn", onclick:(e)=>{ e.stopPropagation(); state.confirmDelete={type:"section", sectionId:section.id, name:section.name}; render(); }, text:"🗑"}));
+  inner.appendChild(headerBtn);
+
+  if(state.expanded[section.id]){
+    const body = el("div",{class:"section-body"});
+    const visible = sortProducts(filterLow(section.products));
+    if(section.products.length === 0){
+      body.appendChild(el("div",{class:"empty-products", text:"No items in this section yet."}));
+    } else if(visible.length === 0){
+      body.appendChild(el("div",{class:"empty-products", text:"No items match the low stock filter."}));
+    } else {
+      visible.forEach((p,i)=> body.appendChild(buildProductRow(p, i===visible.length-1, section.id)));
+    }
+    if(state.addingTo === section.id){
+      body.appendChild(buildProductForm(section.id));
+    } else {
+      body.appendChild(el("button",{class:"add-item-btn", onclick:()=>{ state.addingTo=section.id; state.editing=null; state.form={name:"",qty:"",unit:"pcs",threshold:"5",price:"0"}; render(); }, text:"+ Add item"}));
+    }
+    inner.appendChild(body);
+  }
+  card.appendChild(inner);
+  return card;
+}
+
+function buildProductRow(p, isLast, sectionId, tagName, tagColor){
+  const low = p.qty <= p.threshold;
+  const row = el("div",{class:"product-row"});
+  if(isLast) row.style.borderBottom = "none";
+  const left = el("div",{style:"min-width:0;flex:1"});
+  left.appendChild(el("div",{class:"product-name", text:p.name}));
+  const meta = el("div",{class:"product-meta"});
+  if(tagName) meta.appendChild(el("span",{class:"mini-tag", style:`background:${tagColor}26;color:${tagColor}`, text:tagName}));
+  meta.appendChild(el("span",{text:`threshold ${p.threshold}`}));
+  if(p.price) meta.appendChild(el("span",{class:"price-tag", text:`${CURRENCY}${p.price}`}));
+  left.appendChild(meta);
+  row.appendChild(left);
+
+  const qtyGroup = el("div",{class:"qty-group"});
+  qtyGroup.appendChild(el("button",{class:"qty-btn", onclick:()=>bumpQty(sectionId,p.id,-1), text:"−"}));
+  const tag = el("div",{class:"qty-tag"});
+  if(low) tag.style.borderColor = "var(--rust)";
+  const num = el("span",{class:"qty-num", text:String(p.qty)});
+  if(low) num.style.color = "var(--rust)";
+  tag.append(num, el("span",{class:"qty-unit", text:p.unit}));
+  qtyGroup.appendChild(tag);
+  qtyGroup.appendChild(el("button",{class:"qty-btn", onclick:()=>bumpQty(sectionId,p.id,1), text:"+"}));
+  row.appendChild(qtyGroup);
+
+  const actions = el("div",{class:"row-actions"});
+  actions.appendChild(el("button",{class:"icon-btn", onclick:()=>{ state.addingTo=sectionId; state.editing={sectionId,productId:p.id}; state.form={name:p.name,qty:String(p.qty),unit:p.unit,threshold:String(p.threshold),price:String(p.price||0)}; render(); }, text:"✎"}));
+  actions.appendChild(el("button",{class:"icon-btn", onclick:()=>{ state.confirmDelete={type:"product", sectionId, productId:p.id, name:p.name}; render(); }, text:"🗑"}));
+  row.appendChild(actions);
+  return row;
+}
+
+function buildProductForm(sectionId){
+  const wrap = el("div",{class:"inline-form"});
+  wrap.appendChild(el("div",{class:"form-label", text:"Item name"}));
+  wrap.appendChild(el("input",{class:"text-input", placeholder:"e.g. Sunflower oil 1L", value:state.form.name,
+    oninput:(e)=>{ state.form.name = e.target.value; }}));
+  const grid = el("div",{class:"form-grid"});
+  grid.appendChild(el("div",{},
+    el("div",{class:"form-label", text:"Quantity"}),
+    el("input",{class:"text-input", type:"number", inputmode:"numeric", value:state.form.qty, oninput:(e)=>{state.form.qty=e.target.value;}})
+  ));
+  grid.appendChild(el("div",{},
+    el("div",{class:"form-label", text:"Unit"}),
+    el("input",{class:"text-input", value:state.form.unit, oninput:(e)=>{state.form.unit=e.target.value;}})
+  ));
+  grid.appendChild(el("div",{},
+    el("div",{class:"form-label", text:"Low at"}),
+    el("input",{class:"text-input", type:"number", inputmode:"numeric", value:state.form.threshold, oninput:(e)=>{state.form.threshold=e.target.value;}})
+  ));
+  grid.appendChild(el("div",{},
+    el("div",{class:"form-label", text:`Price (${CURRENCY})`}),
+    el("input",{class:"text-input", type:"number", inputmode:"decimal", placeholder:"0", value:state.form.price, oninput:(e)=>{state.form.price=e.target.value;}})
+  ));
+  wrap.appendChild(grid);
+  const actions = el("div",{class:"form-actions"});
+  actions.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.addingTo=null; state.editing=null; render(); }, text:"Cancel"}));
+  actions.appendChild(el("button",{class:"btn-primary", onclick:()=>saveProduct(sectionId), text: state.editing ? "Save changes" : "Add item"}));
+  wrap.appendChild(actions);
+  return wrap;
+}
+
+function buildAddSectionCard(){
+  const card = el("div",{class:"card"});
+  card.appendChild(el("div",{class:"form-label", text:"Section name"}));
+  card.appendChild(el("input",{class:"text-input", placeholder:"e.g. Beverages", value:state.sectionName,
+    oninput:(e)=>{ state.sectionName = e.target.value; }}));
+  card.appendChild(el("div",{class:"form-label", style:"margin-top:12px", text:"Tab color"}));
+  const swatchRow = el("div",{class:"swatch-row"});
+  TAB_COLORS.forEach(c=>{
+    const sw = el("button",{class:"swatch", style:`background:${c};${state.sectionColor===c?'outline:2px solid #EDF0F2;outline-offset:2px;':''}`,
+      onclick:()=>{ state.sectionColor=c; render(); }});
+    swatchRow.appendChild(sw);
+  });
+  card.appendChild(swatchRow);
+  const actions = el("div",{class:"form-actions"});
+  actions.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.showAddSection=false; state.sectionName=""; render(); }, text:"Cancel"}));
+  actions.appendChild(el("button",{class:"btn-primary", onclick:addSection, text:"✓ Create section"}));
+  card.appendChild(actions);
+  return card;
+}
+
+function buildEmptyState(icon,title,body,actionLabel,onAction){
+  const wrap = el("div",{class:"empty-state"});
+  wrap.appendChild(el("div",{class:"empty-icon", text:icon}));
+  wrap.appendChild(el("div",{class:"empty-title", text:title}));
+  wrap.appendChild(el("div",{class:"empty-body", text:body}));
+  if(actionLabel) wrap.appendChild(el("button",{class:"btn-primary", onclick:onAction, text:`+ ${actionLabel}`}));
+  return wrap;
+}
+
+function buildConfirmModal(){
+  const cd = state.confirmDelete;
+  const overlay = el("div",{class:"modal-overlay", onclick:(e)=>{ if(e.target===overlay){ state.confirmDelete=null; render(); } }});
+  const modal = el("div",{class:"modal"});
+  modal.appendChild(el("div",{class:"modal-title", text: cd.type==="section" ? "Delete section?" : "Remove item?"}));
+  modal.appendChild(el("div",{class:"modal-body", text: cd.type==="section"
+    ? `"${cd.name}" and every item inside it will be removed.`
+    : `"${cd.name}" will be removed from stock.`}));
+  const actions = el("div",{class:"form-actions"});
+  actions.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.confirmDelete=null; render(); }, text:"Cancel"}));
+  actions.appendChild(el("button",{class:"btn-danger", onclick:()=>{
+    if(cd.type==="section") deleteSection(cd.sectionId); else deleteProduct(cd.sectionId, cd.productId);
+  }, text:"Delete"}));
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  return overlay;
+}
+
+function buildDataPanel(){
+  const overlay = el("div",{class:"modal-overlay", onclick:(e)=>{ if(e.target===overlay){ state.showDataPanel=false; render(); } }});
+  const modal = el("div",{class:"modal", style:"max-width:340px"});
+  modal.appendChild(el("div",{class:"modal-title", text:"Data & backup"}));
+
+  const csvIn = el("input",{type:"file", accept:".csv", style:"display:none", onchange:(e)=>handleCsvImport(e)});
+  const backupIn = el("input",{type:"file", accept:".json", style:"display:none", onchange:(e)=>handleBackupImport(e)});
+
+  modal.appendChild(panelRow("Export as CSV","One row per item, opens in any spreadsheet app.","Export", exportCsv));
+  modal.appendChild(panelRow("Import CSV","Adds items into a new section named after the file.","Import", ()=>csvIn.click()));
+  modal.appendChild(panelRow("Backup (full)","Saves every section, color and item as one file.","Save", exportBackup));
+  modal.appendChild(panelRow("Restore backup","Replaces current data with a backup file.","Restore", ()=>backupIn.click()));
+  modal.appendChild(panelRow("Export bills","All bills as CSV, one row per line item.","Export", exportBillsCsv));
+  modal.appendChild(panelRow("Cloud sync","Share stock across devices. Needs a free Firebase project — see the setup note in the app source.","Learn more", ()=>{ state.showDataPanel=false; showToast("See CLOUD_SYNC section at the top of index.html"); }));
+
+  modal.append(csvIn, backupIn);
+  const actions = el("div",{class:"form-actions"});
+  actions.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.showDataPanel=false; render(); }, text:"Close"}));
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  return overlay;
+}
+function panelRow(title, sub, actionLabel, onClick){
+  const row = el("div",{class:"panel-row"});
+  row.appendChild(el("div",{class:"panel-row-text"},
+    el("div",{class:"panel-row-title", text:title}),
+    el("div",{class:"panel-row-sub", text:sub})
+  ));
+  row.appendChild(el("button",{class:"btn-ghost", onclick:onClick, text:actionLabel}));
+  return row;
+}
+
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function csvEscape(v){ const s=String(v); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+function exportCsv(){
+  const rows = [["section","item","quantity","unit","low_at","price"]];
+  state.data.sections.forEach(s=> s.products.forEach(p=> rows.push([s.name, p.name, p.qty, p.unit, p.threshold, p.price||0])));
+  const csv = rows.map(r=>r.map(csvEscape).join(",")).join("\n");
+  downloadFile("stockroom-export.csv", csv, "text/csv");
+  showToast("CSV exported");
+}
+function parseCsv(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
+  return lines.slice(1).map(line=>{
+    const cells = []; let cur=""; let inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(inQ){
+        if(c==='"' && line[i+1]==='"'){ cur+='"'; i++; }
+        else if(c==='"'){ inQ=false; }
+        else cur+=c;
+      } else {
+        if(c==='"') inQ=true;
+        else if(c===','){ cells.push(cur); cur=""; }
+        else cur+=c;
+      }
+    }
+    cells.push(cur);
+    return cells;
+  });
+}
+function handleCsvImport(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const rows = parseCsv(reader.result);
+      const sectionName = "Imported: " + file.name.replace(/\.csv$/i,"");
+      const section = { id: uid(), name: sectionName, color: TAB_COLORS[state.data.sections.length % TAB_COLORS.length], products: [] };
+      rows.forEach(r=>{
+        const [sec, name, qty, unit, low, price] = r;
+        if(!name) return;
+        section.products.push({ id: uid(), name: name.trim(), qty: Math.max(0,Math.round(Number(qty)||0)), unit: (unit||"pcs").trim()||"pcs", threshold: Math.max(0,Math.round(Number(low)||0)), price: Math.max(0, Number(price)||0) });
+      });
+      state.data.sections.push(section);
+      state.expanded[section.id] = true;
+      saveData();
+      state.showDataPanel = false;
+      showToast(`Imported ${section.products.length} items`);
+    }catch(err){ showToast("Couldn't read that CSV file"); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+function exportBackup(){
+  downloadFile("stockroom-backup.json", JSON.stringify(state.data, null, 2), "application/json");
+  showToast("Backup saved");
+}
+function exportBillsCsv(){
+  const rows = [["bill_id","date","customer","item","quantity","unit","price","line_total","bill_total"]];
+  (state.data.bills||[]).forEach(b=>{
+    b.items.forEach(it=> rows.push([b.id, new Date(b.createdAt).toISOString(), b.customer||"", it.name, it.qty, it.unit, it.price, (it.qty*it.price).toFixed(2), b.total.toFixed(2)]));
+  });
+  const csv = rows.map(r=>r.map(csvEscape).join(",")).join("\n");
+  downloadFile("stockroom-bills.csv", csv, "text/csv");
+  showToast("Bills exported");
+}
+function handleBackupImport(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed || !Array.isArray(parsed.sections)) throw new Error("bad shape");
+      state.data = parsed;
+      state.expanded = {};
+      saveData();
+      state.showDataPanel = false;
+      showToast("Backup restored");
+    }catch(err){ showToast("That file isn't a valid backup"); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+function addSection(){
+  const name = state.sectionName.trim();
+  if(!name) return;
+  const newSection = { id: uid(), name, color: state.sectionColor, products: [] };
+  state.data.sections.push(newSection);
+  state.expanded[newSection.id] = true;
+  state.sectionName = "";
+  state.sectionColor = TAB_COLORS[0];
+  state.showAddSection = false;
+  saveData(); render();
+}
+function deleteSection(id){
+  state.data.sections = state.data.sections.filter(s=>s.id!==id);
+  state.confirmDelete = null;
+  saveData(); render();
+}
+function saveProduct(sectionId){
+  const name = state.form.name.trim();
+  if(!name) return;
+  const qty = Math.max(0, Math.round(Number(state.form.qty)||0));
+  const threshold = Math.max(0, Math.round(Number(state.form.threshold)||0));
+  const unit = state.form.unit.trim() || "pcs";
+  const price = Math.max(0, Number(state.form.price)||0);
+  const section = state.data.sections.find(s=>s.id===sectionId);
+  if(state.editing){
+    const prod = section.products.find(p=>p.id===state.editing.productId);
+    Object.assign(prod, {name, qty, unit, threshold, price});
+  } else {
+    section.products.push({ id: uid(), name, qty, unit, threshold, price });
+  }
+  state.addingTo = null; state.editing = null;
+  saveData(); render();
+}
+function deleteProduct(sectionId, productId){
+  const section = state.data.sections.find(s=>s.id===sectionId);
+  section.products = section.products.filter(p=>p.id!==productId);
+  state.confirmDelete = null;
+  saveData(); render();
+}
+function bumpQty(sectionId, productId, delta){
+  const section = state.data.sections.find(s=>s.id===sectionId);
+  const p = section.products.find(p=>p.id===productId);
+  p.qty = Math.max(0, p.qty + delta);
+  saveData(); render();
+}
+
+render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
