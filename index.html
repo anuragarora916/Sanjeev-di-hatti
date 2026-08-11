@@ -8,29 +8,53 @@
 <link rel="manifest" href="manifest.json" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+  
   :root{
     --bg:#12171C; --surface:#1A2129; --surface2:#212B34; --border:#2A333C;
     --text:#EDF0F2; --muted:#8D98A3; --amber:#E3A73C; --teal:#3FA98A; --rust:#D2604A; --blue:#4E8FD0;
   }
+  
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
-    -webkit-tap-highlight-color:transparent; padding-bottom:24px;}
+  
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-tap-highlight-color:transparent;
+    padding-bottom:24px;
+    display:flex;
+    justify-content:center;
+  }
+  
   button,input,select{font-family:inherit;}
-  .header{padding:24px 16px 16px;background:var(--surface);border-bottom:0.5px solid var(--border);}
+  
+  #app-container {
+    width: 100%;
+    max-width: 1100px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header{padding:20px 16px 16px;background:var(--surface);border-bottom:0.5px solid var(--border);}
   .header-top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .brand-mark{width:36px;height:36px;border-radius:8px;background:var(--amber);color:#241A05;
     display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;
-    font-weight:600;font-size:14px;letter-spacing:.5px;}
+    font-weight:600;font-size:14px;letter-spacing:.5px;flex-shrink:0;}
   .brand-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.8px;text-transform:uppercase;}
   .brand-sub{font-size:12px;color:var(--muted);margin-top:1px;}
-  .stats-row{display:flex;gap:8px;}
-  .stat{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface2);
+  
+  .stats-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
+  .stat{display:flex;align-items:center;gap:8px;background:var(--surface2);
     border:0.5px solid var(--border);border-radius:10px;padding:8px 10px;}
   .stat-value{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:15px;line-height:1;}
   .stat-label{font-size:10.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+  
   .search-row{display:flex;align-items:center;gap:8px;margin:14px 16px 6px;padding:9px 12px;
     background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;}
   .search-row input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;}
+  
   .sections-wrap{padding:10px 16px 20px;display:flex;flex-direction:column;gap:12px;}
   .section-card{display:flex;background:var(--surface);border:0.5px solid var(--border);
     border-radius:12px;overflow:hidden;}
@@ -51,15 +75,15 @@
   .product-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
   .mini-tag{border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:500;}
   .qty-group{display:flex;align-items:center;gap:5px;flex-shrink:0;}
-  .qty-btn{width:24px;height:24px;border-radius:6px;border:0.5px solid var(--border);
+  .qty-btn{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);
     background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;
-    cursor:pointer;font-size:14px;}
+    cursor:pointer;font-size:15px;}
   .qty-tag{min-width:48px;display:flex;flex-direction:column;align-items:center;
     border:0.5px solid var(--border);border-radius:6px;padding:2px 6px;}
   .qty-num{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;line-height:1.1;}
   .qty-unit{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
   .row-actions{display:flex;gap:2px;flex-shrink:0;}
-  .icon-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  .icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;
     background:transparent;border:none;cursor:pointer;border-radius:6px;color:var(--muted);font-size:14px;}
   .add-item-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;
     cursor:pointer;color:var(--amber);font-size:12.5px;font-weight:500;padding:10px 14px;}
@@ -91,7 +115,7 @@
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
     justify-content:center;z-index:50;padding:20px;}
   .modal{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px;
-    width:100%;max-width:320px;}
+    width:100%;max-width:360px;}
   .modal-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin-bottom:6px;}
   .modal-body{font-size:12.5px;color:var(--muted);line-height:1.5;}
   .search-meta{font-size:11.5px;color:var(--muted);padding:4px 2px 8px;text-transform:uppercase;letter-spacing:.4px;}
@@ -109,7 +133,7 @@
   .chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
   .chart-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
   .chart-row:last-child{margin-bottom:0;}
-  .chart-label{width:74px;flex-shrink:0;font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .chart-label{width:90px;flex-shrink:0;font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .chart-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
   .chart-fill{height:100%;border-radius:4px;}
   .chart-num{width:22px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
@@ -121,10 +145,11 @@
   .panel-row-sub{font-size:11px;color:var(--muted);line-height:1.4;}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);
     border:0.5px solid var(--border);color:var(--text);font-size:12.5px;padding:9px 16px;border-radius:999px;
-    z-index:100;}
-  .nav-row{display:flex;gap:4px;padding:12px 16px 0;overflow-x:auto;}
-  .nav-btn{flex:1;min-width:64px;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
-    border-radius:8px;padding:8px 0;font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap;}
+    z-index:100;box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
+  .nav-row{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none;}
+  .nav-row::-webkit-scrollbar{display:none;}
+  .nav-btn{flex:1;min-width:68px;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
+    border-radius:8px;padding:10px 0;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
   .nav-btn.active{background:var(--amber);border-color:var(--amber);color:#241A05;}
   .bill-wrap{padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;}
   .price-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);}
@@ -147,22 +172,48 @@
   .bill-list-sub{font-size:11px;color:var(--muted);margin-top:2px;}
   .bill-list-total{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);}
   .shop-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.5px;
-    color:var(--amber);margin-bottom:10px;}
+    color:var(--amber);margin-bottom:6px;}
   .badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;}
   .badge-cash{background:rgba(63,169,138,.2);color:var(--teal);}
   .badge-upi{background:rgba(78,143,208,.2);color:var(--blue);}
   .badge-udhar{background:rgba(210,96,74,.2);color:var(--rust);}
   .pay-btn-group{display:flex;gap:6px;margin-top:6px;}
-  .pay-btn{flex:1;padding:8px 0;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
+  .pay-btn{flex:1;padding:10px 0;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
     border-radius:6px;font-size:12px;cursor:pointer;}
   .pay-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(227,167,60,.1);}
+
+  /* RESPONSIVE LAYOUT BREAKPOINTS */
+  @media (min-width: 600px) {
+    .header{padding:28px 24px 20px;}
+    .search-row, .toolbar, .nav-row, .chart-wrap, .sections-wrap, .bill-wrap {
+      padding-left:24px; padding-right:24px; margin-left:0; margin-right:0;
+    }
+    .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  }
+
+  @media (min-width: 900px) {
+    .sections-wrap {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .section-card { height: 100%; }
+    .add-section-btn { grid-column: span 2; }
+    .bill-grid-desktop {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+  }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app-container">
+    <div id="app"></div>
+  </div>
 
 <script>
 const CLOUD_SYNC = {
@@ -310,7 +361,7 @@ function buildStockView(){
   frag.appendChild(searchRow);
 
   const toolbar = el("div",{class:"toolbar"});
-  const lowChip = el("button",{class:"chip"+(state.lowOnly?" active":""), onclick:()=>{state.lowOnly=!state.lowOnly; render();}, text:"⚠ Low stock only"});
+  const lowChip = el("button",{class:"chip"+(state.lowOnly?" active":""), onclick:()=>{state.lowOnly=!state.lowOnly; render();}, text:"⚠ Low stock"});
   const sortSelect = el("select",{onchange:(e)=>{ state.sortBy=e.target.value; render(); }});
   [["name","Name A–Z"],["qtyAsc","Qty: low to high"],["qtyDesc","Qty: high to low"]].forEach(([v,l])=>{
     const opt = el("option",{value:v, text:l});
@@ -359,15 +410,18 @@ function buildBillingView(){
   const wrap = el("div",{class:"bill-wrap"});
   wrap.appendChild(el("div",{class:"shop-name", text:SHOP_NAME}));
 
-  wrap.appendChild(el("div",{class:"form-label", text:"Customer name"}));
-  wrap.appendChild(el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
+  const mainGrid = el("div",{class:"bill-grid-desktop"});
+  const col1 = el("div",{style:"display:flex;flex-direction:column;gap:12px"});
+  
+  col1.appendChild(el("div",{class:"form-label", text:"Customer name"}));
+  col1.appendChild(el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
     oninput:(e)=>{ state.billCustomer = e.target.value; }}));
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Customer phone (WhatsApp)"}));
-  wrap.appendChild(el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Customer phone (WhatsApp)"}));
+  col1.appendChild(el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
     oninput:(e)=>{ state.billPhone = e.target.value; }}));
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Payment Method"}));
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Payment Method"}));
   const payGroup = el("div",{class:"pay-btn-group"});
   ["Cash","UPI","Udhar"].forEach(m=>{
     payGroup.appendChild(el("button",{
@@ -376,14 +430,14 @@ function buildBillingView(){
       text:m
     }));
   });
-  wrap.appendChild(payGroup);
+  col1.appendChild(payGroup);
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Add item to bill"}));
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add item to bill"}));
   const pickWrap = el("div",{class:"search-row", style:"margin:0"});
   const pickInput = el("input",{placeholder:"Search stock to bill…", value: state.billPicker,
     oninput:(e)=>{ state.billPicker = e.target.value; render(); }});
   pickWrap.append("🔍", pickInput);
-  wrap.appendChild(pickWrap);
+  col1.appendChild(pickWrap);
 
   if(state.billPicker.trim()){
     const q = state.billPicker.trim().toLowerCase();
@@ -401,12 +455,14 @@ function buildBillingView(){
         card.appendChild(row);
       });
     }
-    wrap.appendChild(card);
+    col1.appendChild(card);
   }
+  mainGrid.appendChild(col1);
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:`Bill Items (${state.cart.length})`}));
+  const col2 = el("div",{style:"display:flex;flex-direction:column;gap:12px"});
+  col2.appendChild(el("div",{class:"form-label", text:`Bill Items (${state.cart.length})`}));
   if(state.cart.length === 0){
-    wrap.appendChild(buildEmptyState("🧾","No items yet","Search stock above and tap an item to add it to this bill."));
+    col2.appendChild(buildEmptyState("🧾","No items yet","Search stock and tap an item to add it to this bill."));
   } else {
     const card = el("div",{class:"card"});
     state.cart.forEach((c,i)=>{
@@ -456,10 +512,12 @@ function buildBillingView(){
     totalRow.appendChild(el("div",{class:"total-label", text:"Final Total"}));
     totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${calc.finalTotal.toFixed(2)}`}));
     card.appendChild(totalRow);
-    wrap.appendChild(card);
+    col2.appendChild(card);
 
-    wrap.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate bill & update stock"}));
+    col2.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate bill & update stock"}));
   }
+  mainGrid.appendChild(col2);
+  wrap.appendChild(mainGrid);
   return wrap;
 }
 
@@ -924,7 +982,7 @@ function buildConfirmModal(){
 
 function buildDataPanel(){
   const overlay = el("div",{class:"modal-overlay", onclick:(e)=>{ if(e.target===overlay){ state.showDataPanel=false; render(); } }});
-  const modal = el("div",{class:"modal", style:"max-width:340px"});
+  const modal = el("div",{class:"modal"});
   modal.appendChild(el("div",{class:"modal-title", text:"Data & backup"}));
 
   const csvIn = el("input",{type:"file", accept:".csv", style:"display:none", onchange:(e)=>handleCsvImport(e)});
@@ -944,6 +1002,7 @@ function buildDataPanel(){
   overlay.appendChild(modal);
   return overlay;
 }
+
 function panelRow(title, sub, actionLabel, onClick){
   const row = el("div",{class:"panel-row"});
   row.appendChild(el("div",{class:"panel-row-text"},
