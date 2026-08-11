@@ -149,12 +149,37 @@
   .shop-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.5px;
     color:var(--amber);margin-bottom:10px;}
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div id="app"></div>
 
 <script>
-const CLOUD_SYNC = { enabled: false, firebaseConfig: null };
+const CLOUD_SYNC = {
+  enabled: true,
+  firebaseConfig: {
+    apiKey: "AIzaSyBjo_p6awAAv8XahILy0znYGvCih3dcxCI",
+    authDomain: "sanjeev-di-hatti.firebaseapp.com",
+    projectId: "sanjeev-di-hatti",
+    storageBucket: "sanjeev-di-hatti.firebasestorage.app",
+    messagingSenderId: "951979579807",
+    appId: "1:951979579807:web:cdb100bff5707cb2eb45aa",
+    measurementId: "G-YLEVGJ0SNG"
+  }
+};
+
+let db = null;
+if (CLOUD_SYNC.enabled && CLOUD_SYNC.firebaseConfig) {
+  try {
+    firebase.initializeApp(CLOUD_SYNC.firebaseConfig);
+    db = firebase.firestore();
+  } catch (e) {
+    console.error("Firebase init failed:", e);
+  }
+}
+
 const STORAGE_KEY = "stockroom:data:v1";
 const TAB_COLORS = ["#E3A73C","#3FA98A","#D2604A","#4E8FD0","#9A80D6","#A6B24A"];
 const CURRENCY = "₹";
@@ -173,8 +198,27 @@ function loadData(){
   }catch(e){}
   return { sections: [], bills: [] };
 }
+
 function saveData(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }catch(e){}
+  if (db) {
+    db.collection("stores").doc("main_store").set(state.data)
+      .catch(err => console.error("Cloud save error:", err));
+  }
+}
+
+function initCloudSync(){
+  if (!db) return;
+  db.collection("stores").doc("main_store").onSnapshot((doc) => {
+    if (doc.exists) {
+      const remoteData = doc.data();
+      if (remoteData) {
+        state.data = remoteData;
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }catch(e){}
+        render();
+      }
+    }
+  }, (err) => console.error("Cloud sync listen error:", err));
 }
 
 const state = {
@@ -505,7 +549,7 @@ function printBill(bill){
       .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
     </style></head><body>
       <h1>${SHOP_NAME}</h1>
-      2Receipt</h2>
+      <h2>Receipt</h2>
       <div class="muted">${new Date(bill.createdAt).toLocaleString()}</div>
       <div class="muted">${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
       <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line total</th></tr></thead>
@@ -720,7 +764,7 @@ function buildDataPanel(){
   modal.appendChild(panelRow("Backup (full)","Saves every section, color and item as one file.","Save", exportBackup));
   modal.appendChild(panelRow("Restore backup","Replaces current data with a backup file.","Restore", ()=>backupIn.click()));
   modal.appendChild(panelRow("Export bills","All bills as CSV, one row per line item.","Export", exportBillsCsv));
-  modal.appendChild(panelRow("Cloud sync","Share stock across devices. Needs a free Firebase project — see the setup note in the app source.","Learn more", ()=>{ state.showDataPanel=false; showToast("See CLOUD_SYNC section at the top of index.html"); }));
+  modal.appendChild(panelRow("Cloud sync status", db ? "Real-time sync active" : "Sync disabled","Status", ()=>{ showToast(db ? "Sync active" : "Sync disabled"); }));
 
   modal.append(csvIn, backupIn);
   const actions = el("div",{class:"form-actions"});
@@ -875,6 +919,7 @@ function bumpQty(sectionId, productId, delta){
   saveData(); render();
 }
 
+initCloudSync();
 render();
 
 if('serviceWorker' in navigator){
