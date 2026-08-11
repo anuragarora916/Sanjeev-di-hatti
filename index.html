@@ -154,24 +154,7 @@
   <div id="app"></div>
 
 <script>
-/* CLOUD_SYNC — how to share stock across multiple phones
-   This app works fully offline using the device's local storage. To make two or
-   more phones see the same stock in real time, you need a small free backend —
-   there is no way around that for a static app. The easiest option:
-
-   1. Go to https://console.firebase.google.com, create a free project.
-   2. Enable "Firestore Database" (start in test mode for a quick trial).
-   3. Project settings > add a Web app > copy the firebaseConfig object.
-   4. Add these two script tags right before this <script> tag:
-        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-   5. Paste your config below, set CLOUD_SYNC.enabled = true, and replace
-      saveData()/loadData() calls with reads/writes to a Firestore document
-      (e.g. db.collection("stores").doc("my-store")) instead of localStorage.
-   Ask your assistant to wire this up for you once you have a config — it's a
-   contained change, just needs your real Firebase keys to test against. */
 const CLOUD_SYNC = { enabled: false, firebaseConfig: null };
-
 const STORAGE_KEY = "stockroom:data:v1";
 const TAB_COLORS = ["#E3A73C","#3FA98A","#D2604A","#4E8FD0","#9A80D6","#A6B24A"];
 const CURRENCY = "₹";
@@ -522,7 +505,7 @@ function printBill(bill){
       .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
     </style></head><body>
       <h1>${SHOP_NAME}</h1>
-      <h2>Receipt</h2>
+      2Receipt</h2>
       <div class="muted">${new Date(bill.createdAt).toLocaleString()}</div>
       <div class="muted">${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
       <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line total</th></tr></thead>
