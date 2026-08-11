@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#12171C" />
-<title>Sanjeev Di Hatti — Stockroom</title>
+<title>Sanjeev Di Hatti — Stockroom & Invoicing</title>
 <link rel="manifest" href="manifest.json" />
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
@@ -188,7 +188,6 @@
     .search-row, .toolbar, .nav-row, .chart-wrap, .sections-wrap, .bill-wrap {
       padding-left:24px; padding-right:24px; margin-left:0; margin-right:0;
     }
-    .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
   }
 
   @media (min-width: 900px) {
@@ -249,11 +248,13 @@ function loadData(){
     if(raw){
       const parsed = JSON.parse(raw);
       parsed.bills = parsed.bills || [];
+      parsed.customers = parsed.customers || [];
+      parsed.invoiceSeq = parsed.invoiceSeq || 1001;
       parsed.sections = (parsed.sections||[]).map(s=>({...s, products:(s.products||[]).map(p=>({price:0, ...p}))}));
       return parsed;
     }
   }catch(e){}
-  return { sections: [], bills: [] };
+  return { sections: [], bills: [], customers: [], invoiceSeq: 1001 };
 }
 
 function saveData(){
@@ -271,6 +272,8 @@ function initCloudSync(){
       const remoteData = doc.data();
       if (remoteData) {
         state.data = remoteData;
+        state.data.customers = state.data.customers || [];
+        state.data.invoiceSeq = state.data.invoiceSeq || 1001;
         try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }catch(e){}
         render();
       }
@@ -302,6 +305,7 @@ const state = {
   billTax: 0,
   billPayMode: "Cash",
   activeBillId: null,
+  custSearch: "",
 };
 
 function sortProducts(list){
@@ -335,6 +339,7 @@ function render(){
   if(state.view === "billing"){ root.appendChild(buildBillingView()); }
   else if(state.view === "history"){ root.appendChild(buildHistoryView()); }
   else if(state.view === "udhar"){ root.appendChild(buildUdharView()); }
+  else if(state.view === "customers"){ root.appendChild(buildCustomersView()); }
   else if(state.view === "reports"){ root.appendChild(buildReportsView()); }
   else { root.appendChild(buildStockView()); }
 
@@ -345,7 +350,7 @@ function render(){
 
 function buildNav(){
   const nav = el("div",{class:"nav-row"});
-  [["stock","Stock"],["billing","Billing"],["history","History"],["udhar","Udhar"],["reports","Reports"]].forEach(([v,l])=>{
+  [["stock","Stock"],["billing","Billing"],["history","Invoices"],["udhar","Udhar"],["customers","Customers"],["reports","Reports"]].forEach(([v,l])=>{
     nav.appendChild(el("button",{class:"nav-btn"+(state.view===v?" active":""), onclick:()=>{ state.view=v; render(); }, text:l}));
   });
   return nav;
@@ -413,13 +418,24 @@ function buildBillingView(){
   const mainGrid = el("div",{class:"bill-grid-desktop"});
   const col1 = el("div",{style:"display:flex;flex-direction:column;gap:12px"});
   
-  col1.appendChild(el("div",{class:"form-label", text:"Customer name"}));
-  col1.appendChild(el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
-    oninput:(e)=>{ state.billCustomer = e.target.value; }}));
+  col1.appendChild(el("div",{class:"form-label", text:"Customer Name"}));
+  const custNameInput = el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
+    oninput:(e)=>{ state.billCustomer = e.target.value; autoFillCustomer(); }});
+  col1.appendChild(custNameInput);
 
-  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Customer phone (WhatsApp)"}));
-  col1.appendChild(el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
-    oninput:(e)=>{ state.billPhone = e.target.value; }}));
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Customer Phone (WhatsApp)"}));
+  const custPhoneInput = el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
+    oninput:(e)=>{ state.billPhone = e.target.value; autoFillCustomer(); }});
+  col1.appendChild(custPhoneInput);
+
+  const matchedCust = getMatchedCustomer();
+  if(matchedCust){
+    const custBadge = el("div",{class:"card", style:"padding:8px 12px;background:var(--surface2)"},
+      el("div",{style:"font-size:11.5px;color:var(--muted)"}, `Registered Customer · Lifetime Spend: ${CURRENCY}${getPendingCustomerSpend(matchedCust.phone)}`),
+      matchedCust.pendingUdhar > 0 ? el("div",{style:"font-size:11.5px;color:var(--rust);margin-top:2px;font-weight:600"}, `Pending Udhar Balance: ${CURRENCY}${matchedCust.pendingUdhar.toFixed(2)}`) : null
+    );
+    col1.appendChild(custBadge);
+  }
 
   col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Payment Method"}));
   const payGroup = el("div",{class:"pay-btn-group"});
@@ -432,7 +448,7 @@ function buildBillingView(){
   });
   col1.appendChild(payGroup);
 
-  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add item to bill"}));
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add Item to Invoice"}));
   const pickWrap = el("div",{class:"search-row", style:"margin:0"});
   const pickInput = el("input",{placeholder:"Search stock to bill…", value: state.billPicker,
     oninput:(e)=>{ state.billPicker = e.target.value; render(); }});
@@ -460,9 +476,9 @@ function buildBillingView(){
   mainGrid.appendChild(col1);
 
   const col2 = el("div",{style:"display:flex;flex-direction:column;gap:12px"});
-  col2.appendChild(el("div",{class:"form-label", text:`Bill Items (${state.cart.length})`}));
+  col2.appendChild(el("div",{class:"form-label", text:`Cart Items (${state.cart.length})`}));
   if(state.cart.length === 0){
-    col2.appendChild(buildEmptyState("🧾","No items yet","Search stock and tap an item to add it to this bill."));
+    col2.appendChild(buildEmptyState("🧾","Invoice empty","Search stock and tap an item to add it to this bill."));
   } else {
     const card = el("div",{class:"card"});
     state.cart.forEach((c,i)=>{
@@ -509,16 +525,37 @@ function buildBillingView(){
     }
 
     const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px"});
-    totalRow.appendChild(el("div",{class:"total-label", text:"Final Total"}));
+    totalRow.appendChild(el("div",{class:"total-label", text:"Final Invoice Total"}));
     totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${calc.finalTotal.toFixed(2)}`}));
     card.appendChild(totalRow);
     col2.appendChild(card);
 
-    col2.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate bill & update stock"}));
+    col2.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate Invoice & Update Stock"}));
   }
   mainGrid.appendChild(col2);
   wrap.appendChild(mainGrid);
   return wrap;
+}
+
+function autoFillCustomer(){
+  const phone = state.billPhone.trim();
+  if(phone && state.data.customers){
+    const found = state.data.customers.find(c => c.phone === phone);
+    if(found && !state.billCustomer) {
+      state.billCustomer = found.name;
+    }
+  }
+}
+
+function getMatchedCustomer(){
+  const phone = state.billPhone.trim();
+  if(!phone || !state.data.customers) return null;
+  return state.data.customers.find(c => c.phone === phone);
+}
+
+function getPendingCustomerSpend(phone){
+  if(!phone || !state.data.bills) return "0.00";
+  return state.data.bills.filter(b => b.phone === phone).reduce((sum, b) => sum + b.total, 0).toFixed(2);
 }
 
 function buildHistoryView(){
@@ -532,7 +569,7 @@ function buildHistoryView(){
   }
 
   if(bills.length === 0){
-    wrap.appendChild(buildEmptyState("🧾","No bills yet","Bills you generate will show up here with a full receipt."));
+    wrap.appendChild(buildEmptyState("🧾","No invoices yet","Invoices you generate will show up here with receipt options."));
     return wrap;
   }
   const card = el("div",{class:"card", style:"padding:0"});
@@ -541,7 +578,8 @@ function buildHistoryView(){
     const payBadgeClass = b.payMode==='Udhar'?'badge-udhar':(b.payMode==='UPI'?'badge-upi':'badge-cash');
     row.appendChild(el("div",{},
       el("div",{class:"bill-list-date"},
-        el("span",{text: new Date(b.createdAt).toLocaleString()+" "}),
+        el("span",{style:"font-weight:600", text:`${b.invoiceNo || "INV"} · `}),
+        el("span",{text: new Date(b.createdAt).toLocaleDateString()+" "}),
         el("span",{class:`badge ${payBadgeClass}`, text: b.payMode || "Cash"})
       ),
       el("div",{class:"bill-list-sub", text: `${b.customer || "Walk-in customer"}${b.phone ? " · "+b.phone : ""} · ${b.items.length} item${b.items.length===1?"":"s"}`})
@@ -560,11 +598,11 @@ function buildUdharView(){
 
   const totalUdhar = bills.reduce((sum, b) => sum + b.total, 0);
   const summaryCard = el("div",{class:"card", style:"display:flex;justify-content:space-between;align-items:center"});
-  summaryCard.appendChild(el("div",{}, el("div",{class:"form-label", text:"Total Pending Udhar"}), el("div",{class:"total-value", style:"color:var(--rust)", text:`${CURRENCY}${totalUdhar.toFixed(2)}`})));
+  summaryCard.appendChild(el("div",{}, el("div",{class:"form-label", text:"Total Outstanding Udhar"}), el("div",{class:"total-value", style:"color:var(--rust)", text:`${CURRENCY}${totalUdhar.toFixed(2)}`})));
   wrap.appendChild(summaryCard);
 
   if(bills.length === 0){
-    wrap.appendChild(buildEmptyState("🤝","No pending udhar","All credit bills have been settled!"));
+    wrap.appendChild(buildEmptyState("🤝","No pending udhar","All credit bills have been fully settled!"));
     return wrap;
   }
 
@@ -572,12 +610,58 @@ function buildUdharView(){
   bills.forEach((b,i)=>{
     const row = el("div",{class:"bill-list-row", style: i===bills.length-1 ? "border-bottom:none":""});
     row.appendChild(el("div",{style:"flex:1", onclick:()=>{ state.activeBillId=b.id; render(); }},
-      el("div",{class:"bill-list-date", text: b.customer || "Walk-in customer"}),
+      el("div",{class:"bill-list-date", text: `${b.invoiceNo || 'INV'} · ${b.customer || "Walk-in customer"}`}),
       el("div",{class:"bill-list-sub", text: `${new Date(b.createdAt).toLocaleDateString()} ${b.phone ? "· "+b.phone : ""}`})
     ));
     const right = el("div",{style:"display:flex;align-items:center;gap:10px"});
     right.appendChild(el("div",{class:"bill-list-total", style:"color:var(--rust)", text:`${CURRENCY}${b.total.toFixed(2)}`}));
-    right.appendChild(el("button",{class:"btn-success", style:"padding:4px 8px;font-size:11px", onclick:(e)=>{ e.stopPropagation(); markUdharPaid(b.id); }, text:"Mark Paid"}));
+    right.appendChild(el("button",{class:"btn-success", style:"padding:4px 8px;font-size:11px", onclick:(e)=>{ e.stopPropagation(); markUdharPaid(b.id); }, text:"Settle"}));
+    row.appendChild(right);
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function buildCustomersView(){
+  const wrap = el("div",{class:"bill-wrap"});
+  wrap.appendChild(el("div",{class:"shop-name", text:"Customer Directory"}));
+
+  const searchRow = el("div", {class:"search-row", style:"margin:0"});
+  const searchInput = el("input", {placeholder:"Search customer name or phone…", value: state.custSearch,
+    oninput: (e)=>{ state.custSearch = e.target.value; render(); }});
+  searchRow.append("🔍", searchInput);
+  wrap.appendChild(searchRow);
+
+  const customers = state.data.customers || [];
+  let filtered = customers;
+  if(state.custSearch.trim()){
+    const q = state.custSearch.trim().toLowerCase();
+    filtered = customers.filter(c => c.name.toLowerCase().includes(q) || c.phone.includes(q));
+  }
+
+  if(filtered.length === 0){
+    wrap.appendChild(buildEmptyState("👥","No customers found","Customers are saved automatically when you issue an invoice."));
+    return wrap;
+  }
+
+  const card = el("div",{class:"card", style:"padding:0"});
+  filtered.forEach((c, i) => {
+    const totalSpent = (state.data.bills||[]).filter(b => b.phone === c.phone).reduce((sum, b) => sum + b.total, 0);
+    const pendingUdhar = (state.data.bills||[]).filter(b => b.phone === c.phone && b.payMode === 'Udhar' && !b.paid).reduce((sum, b) => sum + b.total, 0);
+
+    const row = el("div",{class:"bill-list-row", style: i===filtered.length-1 ? "border-bottom:none":""});
+    row.appendChild(el("div",{style:"flex:1"},
+      el("div",{class:"bill-list-date", style:"font-weight:600", text: c.name}),
+      el("div",{class:"bill-list-sub", text: `${c.phone || "No phone"} · Lifetime: ${CURRENCY}${totalSpent.toFixed(2)}`})
+    ));
+    
+    const right = el("div",{style:"text-align:right"});
+    if(pendingUdhar > 0){
+      right.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--rust);font-weight:600"}, `Udhar: ${CURRENCY}${pendingUdhar.toFixed(2)}`));
+    } else {
+      right.appendChild(el("div",{style:"font-size:11px;color:var(--teal)"}, "Clear"));
+    }
     row.appendChild(right);
     card.appendChild(row);
   });
@@ -590,8 +674,16 @@ function markUdharPaid(billId){
   if(bill){
     bill.paid = true;
     bill.paidAt = Date.now();
+    
+    if(bill.phone && state.data.customers){
+      const cust = state.data.customers.find(c => c.phone === bill.phone);
+      if(cust){
+        cust.pendingUdhar = Math.max(0, (cust.pendingUdhar || 0) - bill.total);
+      }
+    }
+    
     saveData();
-    showToast("Udhar marked as settled!");
+    showToast("Udhar invoice marked as settled!");
     render();
   }
 }
@@ -609,9 +701,9 @@ function buildReportsView(){
   const totalSales = bills.reduce((sum, b) => sum + b.total, 0);
 
   const stats = el("div",{class:"stats-row"});
-  stats.appendChild(buildStat("Today Revenue", `${CURRENCY}${todaySales.toFixed(0)}`, false));
+  stats.appendChild(buildStat("Today Sales", `${CURRENCY}${todaySales.toFixed(0)}`, false));
   stats.appendChild(buildStat("Total Revenue", `${CURRENCY}${totalSales.toFixed(0)}`, false));
-  stats.appendChild(buildStat("Total Orders", bills.length, false));
+  stats.appendChild(buildStat("Invoices", bills.length, false));
   wrap.appendChild(stats);
 
   const itemCounts = {};
@@ -648,9 +740,10 @@ function buildBillDetail(bill){
   wrap.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.activeBillId=null; render(); }, text:"← Back"}));
   const card = el("div",{class:"card"});
   card.appendChild(el("div",{class:"shop-name", style:"margin-bottom:2px", text:SHOP_NAME}));
+  card.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--amber);margin-bottom:4px;font-weight:600", text:`Invoice: ${bill.invoiceNo || 'INV'}`}));
   card.appendChild(el("div",{class:"panel-row-sub", text: new Date(bill.createdAt).toLocaleString()}));
-  card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: (bill.customer || "Walk-in customer") + ` (${bill.payMode || "Cash"})`}));
-  if(bill.phone) card.appendChild(el("div",{class:"panel-row-sub", text: bill.phone}));
+  card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: `Customer: ${bill.customer || "Walk-in customer"} (${bill.payMode || "Cash"})`}));
+  if(bill.phone) card.appendChild(el("div",{class:"panel-row-sub", text: `Phone: ${bill.phone}`}));
 
   const itemsWrap = el("div",{style:"margin-top:12px;border-top:0.5px solid var(--border)"});
   bill.items.forEach(it=>{
@@ -665,29 +758,30 @@ function buildBillDetail(bill){
   card.appendChild(itemsWrap);
 
   const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);margin-top:8px;"});
-  totalRow.appendChild(el("div",{class:"total-label", text:"Total Amount"}));
+  totalRow.appendChild(el("div",{class:"total-label", text:"Grand Total"}));
   totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${bill.total.toFixed(2)}`}));
   card.appendChild(totalRow);
   wrap.appendChild(card);
 
   const actions = el("div",{style:"display:flex;gap:8px"});
   actions.appendChild(el("button",{class:"btn-success", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>shareWhatsApp(bill), text:"📱 WhatsApp Receipt"}));
-  actions.appendChild(el("button",{class:"btn-primary", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"🖨 Print / PDF"}));
+  actions.appendChild(el("button",{class:"btn-primary", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"🖨 Print Invoice"}));
   wrap.appendChild(actions);
   return wrap;
 }
 
 function shareWhatsApp(bill){
-  let text = `*Receipt from ${SHOP_NAME}*\n`;
+  let text = `*Tax Invoice from ${SHOP_NAME}*\n`;
+  text += `Invoice No: ${bill.invoiceNo || 'INV'}\n`;
   text += `Date: ${new Date(bill.createdAt).toLocaleDateString()}\n`;
   text += `Customer: ${bill.customer || "Valued Customer"}\n\n`;
-  text += `*Items:*\n`;
+  text += `*Items Purchased:*\n`;
   bill.items.forEach(it => {
     text += `- ${it.name} x${it.qty} (${CURRENCY}${it.price}) = ${CURRENCY}${(it.qty*it.price).toFixed(2)}\n`;
   });
-  text += `\n*Total Amount:* ${CURRENCY}${bill.total.toFixed(2)}\n`;
+  text += `\n*Grand Total:* ${CURRENCY}${bill.total.toFixed(2)}\n`;
   text += `Payment Mode: ${bill.payMode || "Cash"}\n\n`;
-  text += `Thank you for shopping with us!`;
+  text += `Thank you for your business!`;
 
   const encoded = encodeURIComponent(text);
   const phone = bill.phone ? bill.phone.replace(/\D/g,'') : "";
@@ -731,12 +825,19 @@ function generateBill(){
       return;
     }
   }
+
   const totals = getCartTotals();
   const items = state.cart.map(c=>({ name:c.name, unit:c.unit, price:c.price, qty:c.qty }));
+  
+  const seq = state.data.invoiceSeq || 1001;
+  const invoiceNo = `SDH-${new Date().getFullYear()}-${seq}`;
+  state.data.invoiceSeq = seq + 1;
+
   const bill = {
     id: uid(),
+    invoiceNo,
     createdAt: Date.now(),
-    customer: state.billCustomer.trim(),
+    customer: state.billCustomer.trim() || "Walk-in Customer",
     phone: state.billPhone.trim(),
     payMode: state.billPayMode,
     paid: state.billPayMode !== 'Udhar',
@@ -753,6 +854,20 @@ function generateBill(){
     if(prod) prod.qty = Math.max(0, prod.qty - c.qty);
   });
 
+  state.data.customers = state.data.customers || [];
+  if(bill.phone){
+    let cust = state.data.customers.find(c => c.phone === bill.phone);
+    if(!cust){
+      cust = { id: uid(), name: bill.customer, phone: bill.phone, pendingUdhar: 0 };
+      state.data.customers.push(cust);
+    } else {
+      cust.name = bill.customer;
+    }
+    if(bill.payMode === 'Udhar'){
+      cust.pendingUdhar = (cust.pendingUdhar || 0) + bill.total;
+    }
+  }
+
   state.data.bills = state.data.bills || [];
   state.data.bills.push(bill);
   saveData();
@@ -764,7 +879,7 @@ function generateBill(){
   state.billTax = 0;
   state.activeBillId = bill.id;
   state.view = "history";
-  showToast("Bill generated — stock updated");
+  showToast(`Invoice ${invoiceNo} generated`);
 }
 
 function printBill(bill){
@@ -773,7 +888,7 @@ function printBill(bill){
     `<tr><td>${it.name}</td><td style="text-align:center">${it.qty} ${it.unit}</td><td style="text-align:right">${CURRENCY}${it.price}</td><td style="text-align:right">${CURRENCY}${(it.qty*it.price).toFixed(2)}</td></tr>`
   ).join("");
   win.document.write(`
-    <html><head><title>Receipt — ${SHOP_NAME}</title><style>
+    <html><head><title>Invoice — ${SHOP_NAME}</title><style>
       body{font-family:sans-serif;padding:24px;color:#111;}
       table{width:100%;border-collapse:collapse;margin-top:16px;}
       th,td{padding:6px 4px;border-bottom:1px solid #ddd;font-size:13px;text-align:left;}
@@ -782,12 +897,13 @@ function printBill(bill){
       .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
     </style></head><body>
       <h1>${SHOP_NAME}</h1>
-      <h2>Receipt (${bill.payMode || "Cash"})</h2>
-      <div class="muted">${new Date(bill.createdAt).toLocaleString()}</div>
-      <div class="muted">${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
+      <h2>TAX INVOICE (${bill.invoiceNo || 'INV'})</h2>
+      <div class="muted">Date: ${new Date(bill.createdAt).toLocaleString()}</div>
+      <div class="muted">Payment Method: ${bill.payMode || "Cash"}</div>
+      <div class="muted">Customer: ${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
       <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line total</th></tr></thead>
       <tbody>${rows}</tbody></table>
-      <div class="total">Total: ${CURRENCY}${bill.total.toFixed(2)}</div>
+      <div class="total">Grand Total: ${CURRENCY}${bill.total.toFixed(2)}</div>
     </body></html>
   `);
   win.document.close();
@@ -1077,9 +1193,9 @@ function exportBackup(){
   showToast("Backup saved");
 }
 function exportBillsCsv(){
-  const rows = [["bill_id","date","customer","item","quantity","unit","price","line_total","bill_total","pay_mode","paid"]];
+  const rows = [["invoice_no","date","customer","item","quantity","unit","price","line_total","bill_total","pay_mode","paid"]];
   (state.data.bills||[]).forEach(b=>{
-    b.items.forEach(it=> rows.push([b.id, new Date(b.createdAt).toISOString(), b.customer||"", it.name, it.qty, it.unit, it.price, (it.qty*it.price).toFixed(2), b.total.toFixed(2), b.payMode||"Cash", b.paid?"Yes":"No"]));
+    b.items.forEach(it=> rows.push([b.invoiceNo||b.id, new Date(b.createdAt).toISOString(), b.customer||"", it.name, it.qty, it.unit, it.price, (it.qty*it.price).toFixed(2), b.total.toFixed(2), b.payMode||"Cash", b.paid?"Yes":"No"]));
   });
   const csv = rows.map(r=>r.map(csvEscape).join(",")).join("\n");
   downloadFile("stockroom-bills.csv", csv, "text/csv");
