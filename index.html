@@ -10,12 +10,12 @@
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
   :root{
     --bg:#12171C; --surface:#1A2129; --surface2:#212B34; --border:#2A333C;
-    --text:#EDF0F2; --muted:#8D98A3; --amber:#E3A73C; --teal:#3FA98A; --rust:#D2604A;
+    --text:#EDF0F2; --muted:#8D98A3; --amber:#E3A73C; --teal:#3FA98A; --rust:#D2604A; --blue:#4E8FD0;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
     -webkit-tap-highlight-color:transparent; padding-bottom:24px;}
-  button,input{font-family:inherit;}
+  button,input,select{font-family:inherit;}
   .header{padding:24px 16px 16px;background:var(--surface);border-bottom:0.5px solid var(--border);}
   .header-top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
   .brand-mark{width:36px;height:36px;border-radius:8px;background:var(--amber);color:#241A05;
@@ -79,6 +79,7 @@
     padding:8px 14px;font-size:12.5px;cursor:pointer;}
   .btn-primary{display:flex;align-items:center;gap:6px;background:var(--amber);border:none;color:#241A05;
     border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .btn-success{background:var(--teal);border:none;color:#052419;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
   .btn-danger{background:var(--rust);border:none;color:#2A0D07;border-radius:8px;padding:8px 14px;
     font-size:12.5px;font-weight:600;cursor:pointer;}
   .empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--surface);
@@ -121,9 +122,9 @@
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);
     border:0.5px solid var(--border);color:var(--text);font-size:12.5px;padding:9px 16px;border-radius:999px;
     z-index:100;}
-  .nav-row{display:flex;gap:6px;padding:12px 16px 0;}
-  .nav-btn{flex:1;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
-    border-radius:8px;padding:8px 0;font-size:12.5px;font-weight:500;cursor:pointer;}
+  .nav-row{display:flex;gap:4px;padding:12px 16px 0;overflow-x:auto;}
+  .nav-btn{flex:1;min-width:64px;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
+    border-radius:8px;padding:8px 0;font-size:11.5px;font-weight:500;cursor:pointer;white-space:nowrap;}
   .nav-btn.active{background:var(--amber);border-color:var(--amber);color:#241A05;}
   .bill-wrap{padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;}
   .price-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);}
@@ -136,8 +137,7 @@
   .cart-line-total{width:64px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;flex-shrink:0;}
   .pick-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
   .pick-row:last-child{border-bottom:none;}
-  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;
-    border-top:0.5px solid var(--border);margin-top:4px;}
+  .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:8px;}
   .total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
   .total-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:500;color:var(--amber);}
   .bill-list-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
@@ -148,6 +148,14 @@
   .bill-list-total{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);}
   .shop-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.5px;
     color:var(--amber);margin-bottom:10px;}
+  .badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;}
+  .badge-cash{background:rgba(63,169,138,.2);color:var(--teal);}
+  .badge-upi{background:rgba(78,143,208,.2);color:var(--blue);}
+  .badge-udhar{background:rgba(210,96,74,.2);color:var(--rust);}
+  .pay-btn-group{display:flex;gap:6px;margin-top:6px;}
+  .pay-btn{flex:1;padding:8px 0;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
+    border-radius:6px;font-size:12px;cursor:pointer;}
+  .pay-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(227,167,60,.1);}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -175,9 +183,7 @@ if (CLOUD_SYNC.enabled && CLOUD_SYNC.firebaseConfig) {
   try {
     firebase.initializeApp(CLOUD_SYNC.firebaseConfig);
     db = firebase.firestore();
-  } catch (e) {
-    console.error("Firebase init failed:", e);
-  }
+  } catch (e) { console.error("Firebase init failed:", e); }
 }
 
 const STORAGE_KEY = "stockroom:data:v1";
@@ -241,6 +247,9 @@ const state = {
   billCustomer: "",
   billPhone: "",
   billPicker: "",
+  billDiscount: 0,
+  billTax: 0,
+  billPayMode: "Cash",
   activeBillId: null,
 };
 
@@ -274,22 +283,18 @@ function render(){
 
   if(state.view === "billing"){ root.appendChild(buildBillingView()); }
   else if(state.view === "history"){ root.appendChild(buildHistoryView()); }
+  else if(state.view === "udhar"){ root.appendChild(buildUdharView()); }
+  else if(state.view === "reports"){ root.appendChild(buildReportsView()); }
   else { root.appendChild(buildStockView()); }
 
-  if(state.confirmDelete){
-    root.appendChild(buildConfirmModal());
-  }
-  if(state.showDataPanel){
-    root.appendChild(buildDataPanel());
-  }
-  if(state.toast){
-    root.appendChild(el("div",{class:"toast", text:state.toast}));
-  }
+  if(state.confirmDelete){ root.appendChild(buildConfirmModal()); }
+  if(state.showDataPanel){ root.appendChild(buildDataPanel()); }
+  if(state.toast){ root.appendChild(el("div",{class:"toast", text:state.toast})); }
 }
 
 function buildNav(){
   const nav = el("div",{class:"nav-row"});
-  [["stock","Stock"],["billing","Billing"],["history","History"]].forEach(([v,l])=>{
+  [["stock","Stock"],["billing","Billing"],["history","History"],["udhar","Udhar"],["reports","Reports"]].forEach(([v,l])=>{
     nav.appendChild(el("button",{class:"nav-btn"+(state.view===v?" active":""), onclick:()=>{ state.view=v; render(); }, text:l}));
   });
   return nav;
@@ -297,7 +302,6 @@ function buildNav(){
 
 function buildStockView(){
   const frag = el("div",{});
-
   const searchRow = el("div", {class:"search-row"});
   const searchInput = el("input", {placeholder:"Search stock…", value: state.search,
     oninput: (e)=>{ state.search = e.target.value; render(); }});
@@ -317,12 +321,9 @@ function buildStockView(){
   toolbar.append(lowChip, sortSelect, menuBtn);
   frag.appendChild(toolbar);
 
-  if(!state.search.trim() && state.data.sections.length > 0){
-    frag.appendChild(buildChart());
-  }
+  if(!state.search.trim() && state.data.sections.length > 0){ frag.appendChild(buildChart()); }
 
   const wrap = el("div", {class:"sections-wrap"});
-
   if(state.search.trim()){
     const q = state.search.trim().toLowerCase();
     const all = state.data.sections.flatMap(s => s.products.map(p => ({...p, sectionId:s.id, sectionName:s.name, sectionColor:s.color})));
@@ -341,13 +342,11 @@ function buildStockView(){
     }
     state.data.sections.forEach(section => wrap.appendChild(buildSection(section)));
 
-    if(state.showAddSection){
-      wrap.appendChild(buildAddSectionCard());
-    } else if(state.data.sections.length > 0){
+    if(state.showAddSection){ wrap.appendChild(buildAddSectionCard()); }
+    else if(state.data.sections.length > 0){
       wrap.appendChild(el("button",{class:"add-section-btn", onclick:()=>{state.showAddSection=true; render();}, text:"+ New section"}));
     }
   }
-
   frag.appendChild(wrap);
   return frag;
 }
@@ -358,18 +357,28 @@ function allProductsFlat(){
 
 function buildBillingView(){
   const wrap = el("div",{class:"bill-wrap"});
-
   wrap.appendChild(el("div",{class:"shop-name", text:SHOP_NAME}));
 
   wrap.appendChild(el("div",{class:"form-label", text:"Customer name"}));
   wrap.appendChild(el("input",{class:"text-input", placeholder:"Walk-in customer", value:state.billCustomer,
     oninput:(e)=>{ state.billCustomer = e.target.value; }}));
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Customer phone"}));
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Customer phone (WhatsApp)"}));
   wrap.appendChild(el("input",{class:"text-input", type:"tel", inputmode:"tel", placeholder:"98xxxxxxxx", value:state.billPhone,
     oninput:(e)=>{ state.billPhone = e.target.value; }}));
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add item to bill"}));
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Payment Method"}));
+  const payGroup = el("div",{class:"pay-btn-group"});
+  ["Cash","UPI","Udhar"].forEach(m=>{
+    payGroup.appendChild(el("button",{
+      class:`pay-btn ${state.billPayMode===m?'active':''}`,
+      onclick:()=>{ state.billPayMode=m; render(); },
+      text:m
+    }));
+  });
+  wrap.appendChild(payGroup);
+
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:"Add item to bill"}));
   const pickWrap = el("div",{class:"search-row", style:"margin:0"});
   const pickInput = el("input",{placeholder:"Search stock to bill…", value: state.billPicker,
     oninput:(e)=>{ state.billPicker = e.target.value; render(); }});
@@ -380,9 +389,8 @@ function buildBillingView(){
     const q = state.billPicker.trim().toLowerCase();
     const matches = allProductsFlat().filter(p => p.name.toLowerCase().includes(q)).slice(0,8);
     const card = el("div",{class:"card", style:"padding:0 14px"});
-    if(matches.length === 0){
-      card.appendChild(el("div",{class:"empty-products", text:"No stock items match."}));
-    } else {
+    if(matches.length === 0){ card.appendChild(el("div",{class:"empty-products", text:"No stock items match."})); }
+    else {
       matches.forEach((p,i)=>{
         const row = el("div",{class:"pick-row", style: i===matches.length-1 ? "border-bottom:none" : "", onclick:()=>addToCart(p)});
         row.appendChild(el("div",{style:"flex:1;min-width:0"},
@@ -396,7 +404,7 @@ function buildBillingView(){
     wrap.appendChild(card);
   }
 
-  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:`Bill (${state.cart.length})`}));
+  wrap.appendChild(el("div",{class:"form-label", style:"margin-top:10px", text:`Bill Items (${state.cart.length})`}));
   if(state.cart.length === 0){
     wrap.appendChild(buildEmptyState("🧾","No items yet","Search stock above and tap an item to add it to this bill."));
   } else {
@@ -413,16 +421,45 @@ function buildBillingView(){
       row.appendChild(el("button",{class:"icon-btn", onclick:()=>removeFromCart(i), text:"✕"}));
       card.appendChild(row);
     });
-    const total = cartTotal();
-    const totalRow = el("div",{class:"total-row"});
-    totalRow.appendChild(el("div",{class:"total-label", text:"Total"}));
-    totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${total.toFixed(2)}`}));
+
+    const grid = el("div",{class:"form-grid", style:"margin-top:10px;border-top:0.5px solid var(--border);padding-top:10px;"});
+    grid.appendChild(el("div",{},
+      el("div",{class:"form-label", text:"Discount (%)"}),
+      el("input",{class:"text-input", type:"number", value:String(state.billDiscount), oninput:(e)=>{ state.billDiscount=Number(e.target.value)||0; render(); }})
+    ));
+    grid.appendChild(el("div",{},
+      el("div",{class:"form-label", text:"Tax/GST (%)"}),
+      el("input",{class:"text-input", type:"number", value:String(state.billTax), oninput:(e)=>{ state.billTax=Number(e.target.value)||0; render(); }})
+    ));
+    card.appendChild(grid);
+
+    const calc = getCartTotals();
+    const subtotalRow = el("div",{class:"total-row", style:"margin-top:8px"});
+    subtotalRow.appendChild(el("div",{class:"total-label", text:"Subtotal"}));
+    subtotalRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:14px;", text:`${CURRENCY}${calc.subtotal.toFixed(2)}`}));
+    card.appendChild(subtotalRow);
+
+    if(calc.discountAmt > 0){
+      const discRow = el("div",{class:"total-row"});
+      discRow.appendChild(el("div",{class:"total-label", text:`Discount (${state.billDiscount}%)`}));
+      discRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--rust)", text:`-${CURRENCY}${calc.discountAmt.toFixed(2)}`}));
+      card.appendChild(discRow);
+    }
+    if(calc.taxAmt > 0){
+      const taxRow = el("div",{class:"total-row"});
+      taxRow.appendChild(el("div",{class:"total-label", text:`Tax/GST (${state.billTax}%)`}));
+      taxRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--teal)", text:`+${CURRENCY}${calc.taxAmt.toFixed(2)}`}));
+      card.appendChild(taxRow);
+    }
+
+    const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px"});
+    totalRow.appendChild(el("div",{class:"total-label", text:"Final Total"}));
+    totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${calc.finalTotal.toFixed(2)}`}));
     card.appendChild(totalRow);
     wrap.appendChild(card);
 
     wrap.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate bill & update stock"}));
   }
-
   return wrap;
 }
 
@@ -443,8 +480,12 @@ function buildHistoryView(){
   const card = el("div",{class:"card", style:"padding:0"});
   bills.forEach((b,i)=>{
     const row = el("div",{class:"bill-list-row", style: i===bills.length-1 ? "border-bottom:none":"", onclick:()=>{ state.activeBillId=b.id; render(); }});
+    const payBadgeClass = b.payMode==='Udhar'?'badge-udhar':(b.payMode==='UPI'?'badge-upi':'badge-cash');
     row.appendChild(el("div",{},
-      el("div",{class:"bill-list-date", text: new Date(b.createdAt).toLocaleString()}),
+      el("div",{class:"bill-list-date"},
+        el("span",{text: new Date(b.createdAt).toLocaleString()+" "}),
+        el("span",{class:`badge ${payBadgeClass}`, text: b.payMode || "Cash"})
+      ),
       el("div",{class:"bill-list-sub", text: `${b.customer || "Walk-in customer"}${b.phone ? " · "+b.phone : ""} · ${b.items.length} item${b.items.length===1?"":"s"}`})
     ));
     row.appendChild(el("div",{class:"bill-list-total", text:`${CURRENCY}${b.total.toFixed(2)}`}));
@@ -454,14 +495,105 @@ function buildHistoryView(){
   return wrap;
 }
 
+function buildUdharView(){
+  const wrap = el("div",{class:"bill-wrap"});
+  wrap.appendChild(el("div",{class:"shop-name", text:"Udhar / Credit Ledger"}));
+  const bills = (state.data.bills||[]).filter(b => b.payMode === 'Udhar' && !b.paid).sort((a,b)=>b.createdAt-a.createdAt);
+
+  const totalUdhar = bills.reduce((sum, b) => sum + b.total, 0);
+  const summaryCard = el("div",{class:"card", style:"display:flex;justify-content:space-between;align-items:center"});
+  summaryCard.appendChild(el("div",{}, el("div",{class:"form-label", text:"Total Pending Udhar"}), el("div",{class:"total-value", style:"color:var(--rust)", text:`${CURRENCY}${totalUdhar.toFixed(2)}`})));
+  wrap.appendChild(summaryCard);
+
+  if(bills.length === 0){
+    wrap.appendChild(buildEmptyState("🤝","No pending udhar","All credit bills have been settled!"));
+    return wrap;
+  }
+
+  const card = el("div",{class:"card", style:"padding:0"});
+  bills.forEach((b,i)=>{
+    const row = el("div",{class:"bill-list-row", style: i===bills.length-1 ? "border-bottom:none":""});
+    row.appendChild(el("div",{style:"flex:1", onclick:()=>{ state.activeBillId=b.id; render(); }},
+      el("div",{class:"bill-list-date", text: b.customer || "Walk-in customer"}),
+      el("div",{class:"bill-list-sub", text: `${new Date(b.createdAt).toLocaleDateString()} ${b.phone ? "· "+b.phone : ""}`})
+    ));
+    const right = el("div",{style:"display:flex;align-items:center;gap:10px"});
+    right.appendChild(el("div",{class:"bill-list-total", style:"color:var(--rust)", text:`${CURRENCY}${b.total.toFixed(2)}`}));
+    right.appendChild(el("button",{class:"btn-success", style:"padding:4px 8px;font-size:11px", onclick:(e)=>{ e.stopPropagation(); markUdharPaid(b.id); }, text:"Mark Paid"}));
+    row.appendChild(right);
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function markUdharPaid(billId){
+  const bill = (state.data.bills||[]).find(b => b.id === billId);
+  if(bill){
+    bill.paid = true;
+    bill.paidAt = Date.now();
+    saveData();
+    showToast("Udhar marked as settled!");
+    render();
+  }
+}
+
+function buildReportsView(){
+  const wrap = el("div",{class:"bill-wrap"});
+  wrap.appendChild(el("div",{class:"shop-name", text:"Sales Reports & Analytics"}));
+
+  const bills = state.data.bills || [];
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+  const todayBills = bills.filter(b => b.createdAt >= startOfDay);
+  const todaySales = todayBills.reduce((sum, b) => sum + b.total, 0);
+  const totalSales = bills.reduce((sum, b) => sum + b.total, 0);
+
+  const stats = el("div",{class:"stats-row"});
+  stats.appendChild(buildStat("Today Revenue", `${CURRENCY}${todaySales.toFixed(0)}`, false));
+  stats.appendChild(buildStat("Total Revenue", `${CURRENCY}${totalSales.toFixed(0)}`, false));
+  stats.appendChild(buildStat("Total Orders", bills.length, false));
+  wrap.appendChild(stats);
+
+  const itemCounts = {};
+  bills.forEach(b => {
+    (b.items||[]).forEach(it => {
+      itemCounts[it.name] = (itemCounts[it.name] || 0) + it.qty;
+    });
+  });
+
+  const sortedItems = Object.entries(itemCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const chartCard = el("div",{class:"card"});
+  chartCard.appendChild(el("div",{class:"chart-title", text:"Top Selling Items"}));
+
+  if(sortedItems.length === 0){
+    chartCard.appendChild(el("div",{class:"empty-products", text:"No items sold yet."}));
+  } else {
+    const maxQty = Math.max(1, ...sortedItems.map(i=>i[1]));
+    sortedItems.forEach(([name, qty])=>{
+      const row = el("div",{class:"chart-row"});
+      row.appendChild(el("div",{class:"chart-label", text:name}));
+      const track = el("div",{class:"chart-track"});
+      const pct = Math.round((qty / maxQty) * 100);
+      track.appendChild(el("div",{class:"chart-fill", style:`width:${pct}%;background:var(--amber)`}));
+      row.append(track, el("div",{class:"chart-num", text:String(qty)}));
+      chartCard.appendChild(row);
+    });
+  }
+  wrap.appendChild(chartCard);
+  return wrap;
+}
+
 function buildBillDetail(bill){
   const wrap = el("div",{class:"bill-wrap"});
-  wrap.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.activeBillId=null; render(); }, text:"← Back to history"}));
+  wrap.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.activeBillId=null; render(); }, text:"← Back"}));
   const card = el("div",{class:"card"});
   card.appendChild(el("div",{class:"shop-name", style:"margin-bottom:2px", text:SHOP_NAME}));
   card.appendChild(el("div",{class:"panel-row-sub", text: new Date(bill.createdAt).toLocaleString()}));
-  card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: bill.customer || "Walk-in customer"}));
+  card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: (bill.customer || "Walk-in customer") + ` (${bill.payMode || "Cash"})`}));
   if(bill.phone) card.appendChild(el("div",{class:"panel-row-sub", text: bill.phone}));
+
   const itemsWrap = el("div",{style:"margin-top:12px;border-top:0.5px solid var(--border)"});
   bill.items.forEach(it=>{
     const row = el("div",{class:"cart-row"});
@@ -473,13 +605,36 @@ function buildBillDetail(bill){
     itemsWrap.appendChild(row);
   });
   card.appendChild(itemsWrap);
-  const totalRow = el("div",{class:"total-row"});
-  totalRow.appendChild(el("div",{class:"total-label", text:"Total"}));
+
+  const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);margin-top:8px;"});
+  totalRow.appendChild(el("div",{class:"total-label", text:"Total Amount"}));
   totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${bill.total.toFixed(2)}`}));
   card.appendChild(totalRow);
   wrap.appendChild(card);
-  wrap.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"Print / Save as PDF"}));
+
+  const actions = el("div",{style:"display:flex;gap:8px"});
+  actions.appendChild(el("button",{class:"btn-success", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>shareWhatsApp(bill), text:"📱 WhatsApp Receipt"}));
+  actions.appendChild(el("button",{class:"btn-primary", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"🖨 Print / PDF"}));
+  wrap.appendChild(actions);
   return wrap;
+}
+
+function shareWhatsApp(bill){
+  let text = `*Receipt from ${SHOP_NAME}*\n`;
+  text += `Date: ${new Date(bill.createdAt).toLocaleDateString()}\n`;
+  text += `Customer: ${bill.customer || "Valued Customer"}\n\n`;
+  text += `*Items:*\n`;
+  bill.items.forEach(it => {
+    text += `- ${it.name} x${it.qty} (${CURRENCY}${it.price}) = ${CURRENCY}${(it.qty*it.price).toFixed(2)}\n`;
+  });
+  text += `\n*Total Amount:* ${CURRENCY}${bill.total.toFixed(2)}\n`;
+  text += `Payment Mode: ${bill.payMode || "Cash"}\n\n`;
+  text += `Thank you for shopping with us!`;
+
+  const encoded = encodeURIComponent(text);
+  const phone = bill.phone ? bill.phone.replace(/\D/g,'') : "";
+  const url = phone ? `https://wa.me/${phone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  window.open(url, "_blank");
 }
 
 function addToCart(product){
@@ -499,13 +654,17 @@ function setCartQty(index, value){
   state.cart[index].qty = qty;
   render();
 }
-function removeFromCart(index){
-  state.cart.splice(index,1);
-  render();
+function removeFromCart(index){ state.cart.splice(index,1); render(); }
+
+function getCartTotals(){
+  const subtotal = state.cart.reduce((sum,c)=> sum + c.qty*c.price, 0);
+  const discountAmt = (subtotal * state.billDiscount) / 100;
+  const afterDisc = subtotal - discountAmt;
+  const taxAmt = (afterDisc * state.billTax) / 100;
+  const finalTotal = afterDisc + taxAmt;
+  return { subtotal, discountAmt, taxAmt, finalTotal };
 }
-function cartTotal(){
-  return state.cart.reduce((sum,c)=> sum + c.qty*c.price, 0);
-}
+
 function generateBill(){
   if(state.cart.length === 0) return;
   for(const c of state.cart){
@@ -514,8 +673,21 @@ function generateBill(){
       return;
     }
   }
+  const totals = getCartTotals();
   const items = state.cart.map(c=>({ name:c.name, unit:c.unit, price:c.price, qty:c.qty }));
-  const bill = { id: uid(), createdAt: Date.now(), customer: state.billCustomer.trim(), phone: state.billPhone.trim(), items, total: cartTotal() };
+  const bill = {
+    id: uid(),
+    createdAt: Date.now(),
+    customer: state.billCustomer.trim(),
+    phone: state.billPhone.trim(),
+    payMode: state.billPayMode,
+    paid: state.billPayMode !== 'Udhar',
+    items,
+    subtotal: totals.subtotal,
+    discount: state.billDiscount,
+    tax: state.billTax,
+    total: totals.finalTotal
+  };
 
   state.cart.forEach(c=>{
     const section = state.data.sections.find(s=>s.id===c.sectionId);
@@ -530,10 +702,13 @@ function generateBill(){
   state.cart = [];
   state.billCustomer = "";
   state.billPhone = "";
+  state.billDiscount = 0;
+  state.billTax = 0;
   state.activeBillId = bill.id;
   state.view = "history";
   showToast("Bill generated — stock updated");
 }
+
 function printBill(bill){
   const win = window.open("", "_blank");
   const rows = bill.items.map(it=>
@@ -549,7 +724,7 @@ function printBill(bill){
       .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
     </style></head><body>
       <h1>${SHOP_NAME}</h1>
-      <h2>Receipt</h2>
+      <h2>Receipt (${bill.payMode || "Cash"})</h2>
       <div class="muted">${new Date(bill.createdAt).toLocaleString()}</div>
       <div class="muted">${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
       <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Line total</th></tr></thead>
@@ -625,16 +800,12 @@ function buildSection(section){
   if(state.expanded[section.id]){
     const body = el("div",{class:"section-body"});
     const visible = sortProducts(filterLow(section.products));
-    if(section.products.length === 0){
-      body.appendChild(el("div",{class:"empty-products", text:"No items in this section yet."}));
-    } else if(visible.length === 0){
-      body.appendChild(el("div",{class:"empty-products", text:"No items match the low stock filter."}));
-    } else {
-      visible.forEach((p,i)=> body.appendChild(buildProductRow(p, i===visible.length-1, section.id)));
-    }
-    if(state.addingTo === section.id){
-      body.appendChild(buildProductForm(section.id));
-    } else {
+    if(section.products.length === 0){ body.appendChild(el("div",{class:"empty-products", text:"No items in this section yet."})); }
+    else if(visible.length === 0){ body.appendChild(el("div",{class:"empty-products", text:"No items match the low stock filter."})); }
+    else { visible.forEach((p,i)=> body.appendChild(buildProductRow(p, i===visible.length-1, section.id))); }
+
+    if(state.addingTo === section.id){ body.appendChild(buildProductForm(section.id)); }
+    else {
       body.appendChild(el("button",{class:"add-item-btn", onclick:()=>{ state.addingTo=section.id; state.editing=null; state.form={name:"",qty:"",unit:"pcs",threshold:"5",price:"0"}; render(); }, text:"+ Add item"}));
     }
     inner.appendChild(body);
@@ -847,9 +1018,9 @@ function exportBackup(){
   showToast("Backup saved");
 }
 function exportBillsCsv(){
-  const rows = [["bill_id","date","customer","item","quantity","unit","price","line_total","bill_total"]];
+  const rows = [["bill_id","date","customer","item","quantity","unit","price","line_total","bill_total","pay_mode","paid"]];
   (state.data.bills||[]).forEach(b=>{
-    b.items.forEach(it=> rows.push([b.id, new Date(b.createdAt).toISOString(), b.customer||"", it.name, it.qty, it.unit, it.price, (it.qty*it.price).toFixed(2), b.total.toFixed(2)]));
+    b.items.forEach(it=> rows.push([b.id, new Date(b.createdAt).toISOString(), b.customer||"", it.name, it.qty, it.unit, it.price, (it.qty*it.price).toFixed(2), b.total.toFixed(2), b.payMode||"Cash", b.paid?"Yes":"No"]));
   });
   const csv = rows.map(r=>r.map(csvEscape).join(",")).join("\n");
   downloadFile("stockroom-bills.csv", csv, "text/csv");
