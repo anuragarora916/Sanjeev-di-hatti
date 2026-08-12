@@ -3,15 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#12171C" />
+<meta name="theme-color" content="#0F1419" />
 <title>Sanjeev Di Hatti — Stockroom & Invoicing</title>
 <link rel="manifest" href="manifest.json" />
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
   
   :root{
-    --bg:#12171C; --surface:#1A2129; --surface2:#212B34; --border:#2A333C;
-    --text:#EDF0F2; --muted:#8D98A3; --amber:#E3A73C; --teal:#3FA98A; --rust:#D2604A; --blue:#4E8FD0;
+    --bg:#0F1419; 
+    --surface:#161E27; 
+    --surface2:#1F2934; 
+    --border:#2B3846;
+    --text:#F0F4F8; 
+    --muted:#8C9BA8; 
+    --amber:#F2B038; 
+    --amber-glow:rgba(242,176,56,0.15);
+    --teal:#3BB990; 
+    --rust:#E05A47; 
+    --blue:#4A90E2;
+    --radius:14px;
   }
   
   *{box-sizing:border-box;}
@@ -22,7 +32,7 @@
     color:var(--text);
     font-family:'Inter',sans-serif;
     -webkit-tap-highlight-color:transparent;
-    padding-bottom:24px;
+    padding-bottom:28px;
     display:flex;
     justify-content:center;
   }
@@ -37,150 +47,259 @@
     flex-direction: column;
   }
 
-  .header{padding:20px 16px 16px;background:var(--surface);border-bottom:0.5px solid var(--border);}
-  .header-top{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-  .brand-mark{width:36px;height:36px;border-radius:8px;background:var(--amber);color:#241A05;
-    display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;
-    font-weight:600;font-size:14px;letter-spacing:.5px;flex-shrink:0;}
-  .brand-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.8px;text-transform:uppercase;}
-  .brand-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+  .header{
+    padding:22px 20px 18px;
+    background:linear-gradient(180deg, #18222D 0%, var(--surface) 100%);
+    border-bottom:1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .header-top{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .brand-mark{
+    width:42px;height:48px;border-radius:10px;
+    background:linear-gradient(135deg, var(--amber) 0%, #C8881A 100%);
+    color:#1A1102;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Oswald',sans-serif;font-weight:700;font-size:16px;
+    letter-spacing:.5px;flex-shrink:0;
+    box-shadow: 0 4px 12px rgba(242,176,56,0.3);
+  }
+  .brand-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;text-transform:uppercase;color:#FFF;}
+  .brand-sub{font-size:11.5px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;}
   
-  .stats-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;}
-  .stat{display:flex;align-items:center;gap:8px;background:var(--surface2);
-    border:0.5px solid var(--border);border-radius:10px;padding:8px 10px;}
-  .stat-value{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:15px;line-height:1;}
-  .stat-label{font-size:10.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+  .stats-row{display:grid;grid-template-columns:repeat(3, 1fr);gap:10px;}
+  .stat{
+    display:flex;align-items:center;gap:10px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+    transition: transform 0.15s ease;
+  }
+  .stat-value{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;line-height:1;}
+  .stat-label{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
   
-  .search-row{display:flex;align-items:center;gap:8px;margin:14px 16px 6px;padding:9px 12px;
-    background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;}
+  .search-row{
+    display:flex;align-items:center;gap:10px;margin:16px 16px 8px;padding:11px 14px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  }
   .search-row input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;}
   
-  .sections-wrap{padding:10px 16px 20px;display:flex;flex-direction:column;gap:12px;}
-  .section-card{display:flex;background:var(--surface);border:0.5px solid var(--border);
-    border-radius:12px;overflow:hidden;}
-  .tab{width:5px;flex-shrink:0;}
+  .sections-wrap{padding:12px 16px 24px;display:flex;flex-direction:column;gap:14px;}
+  .section-card{
+    display:flex;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);overflow:hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transition: border-color 0.2s ease;
+  }
+  .section-card:hover{ border-color:#3A4A58; }
+  .tab{width:6px;flex-shrink:0;}
   .section-inner{flex:1;min-width:0;}
-  .section-header{width:100%;display:flex;align-items:center;gap:8px;background:transparent;
-    border:none;cursor:pointer;padding:13px 12px;text-align:left;color:var(--text);}
-  .section-title{font-family:'Oswald',sans-serif;font-weight:500;font-size:15px;letter-spacing:.3px;}
-  .section-count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);
-    background:var(--surface2);border-radius:6px;padding:1px 6px;}
-  .low-badge{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--rust);
-    background:rgba(210,96,74,.1);border-radius:6px;padding:2px 6px;}
-  .section-body{border-top:0.5px solid var(--border);padding:2px 0;}
-  .empty-products{padding:16px 14px;font-size:12.5px;color:var(--muted);}
-  .product-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:0.5px solid var(--border);}
+  .section-header{
+    width:100%;display:flex;align-items:center;gap:10px;background:transparent;
+    border:none;cursor:pointer;padding:14px 14px;text-align:left;color:var(--text);
+  }
+  .section-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;letter-spacing:.4px;}
+  .section-count{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+    background:var(--surface2);border-radius:6px;padding:2px 7px;border:1px solid var(--border);
+  }
+  .low-badge{
+    display:flex;align-items:center;gap:4px;font-size:11px;color:var(--rust);
+    background:rgba(224,90,71,0.15);border:1px solid rgba(224,90,71,0.3);
+    border-radius:6px;padding:2px 8px;font-weight:600;
+  }
+  .section-body{border-top:1px solid var(--border);padding:4px 0;background:rgba(0,0,0,0.1);}
+  .empty-products{padding:18px 16px;font-size:13px;color:var(--muted);}
+  .product-row{
+    display:flex;align-items:center;gap:12px;padding:12px 16px;
+    border-bottom:1px solid var(--border);
+  }
   .product-row:last-child{border-bottom:none;}
-  .product-name{font-size:13.5px;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .product-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
-  .mini-tag{border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:500;}
-  .qty-group{display:flex;align-items:center;gap:5px;flex-shrink:0;}
-  .qty-btn{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);
+  .product-name{font-size:14px;font-weight:500;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .product-meta{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);}
+  .mini-tag{border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;}
+  .qty-group{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .qty-btn{
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
     background:var(--surface2);color:var(--text);display:flex;align-items:center;justify-content:center;
-    cursor:pointer;font-size:15px;}
-  .qty-tag{min-width:48px;display:flex;flex-direction:column;align-items:center;
-    border:0.5px solid var(--border);border-radius:6px;padding:2px 6px;}
-  .qty-num{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;line-height:1.1;}
-  .qty-unit{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
-  .row-actions{display:flex;gap:2px;flex-shrink:0;}
-  .icon-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;
-    background:transparent;border:none;cursor:pointer;border-radius:6px;color:var(--muted);font-size:14px;}
-  .add-item-btn{display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;
-    cursor:pointer;color:var(--amber);font-size:12.5px;font-weight:500;padding:10px 14px;}
-  .add-section-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface);
-    border:1px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px;padding:12px;
-    cursor:pointer;width:100%;}
-  .card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:14px;}
-  .form-label{font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
-  .text-input{width:100%;background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;
-    padding:9px 10px;color:var(--text);font-size:13.5px;outline:none;}
-  .swatch-row{display:flex;gap:10px;}
-  .swatch{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;}
-  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
-  .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
-  .inline-form{padding:10px 14px 14px;border-top:0.5px solid var(--border);}
-  .btn-ghost{background:transparent;border:0.5px solid var(--border);color:var(--muted);border-radius:8px;
-    padding:8px 14px;font-size:12.5px;cursor:pointer;}
-  .btn-primary{display:flex;align-items:center;gap:6px;background:var(--amber);border:none;color:#241A05;
-    border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
-  .btn-success{background:var(--teal);border:none;color:#052419;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;}
-  .btn-danger{background:var(--rust);border:none;color:#2A0D07;border-radius:8px;padding:8px 14px;
-    font-size:12.5px;font-weight:600;cursor:pointer;}
-  .empty-state{display:flex;flex-direction:column;align-items:center;text-align:center;background:var(--surface);
-    border:0.5px solid var(--border);border-radius:12px;padding:28px 20px;}
-  .empty-icon{width:44px;height:44px;border-radius:50%;background:var(--surface2);display:flex;
-    align-items:center;justify-content:center;margin-bottom:12px;font-size:20px;}
-  .empty-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin-bottom:4px;}
-  .empty-body{font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5;max-width:260px;}
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
-    justify-content:center;z-index:50;padding:20px;}
-  .modal{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px;
-    width:100%;max-width:360px;}
-  .modal-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin-bottom:6px;}
-  .modal-body{font-size:12.5px;color:var(--muted);line-height:1.5;}
-  .search-meta{font-size:11.5px;color:var(--muted);padding:4px 2px 8px;text-transform:uppercase;letter-spacing:.4px;}
+    cursor:pointer;font-size:16px;font-weight:600;transition: background 0.15s ease;
+  }
+  .qty-btn:active{ background:#2A3744; }
+  .qty-tag{
+    min-width:52px;display:flex;flex-direction:column;align-items:center;
+    border:1px solid var(--border);border-radius:8px;padding:3px 8px;background:var(--surface2);
+  }
+  .qty-num{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13.5px;line-height:1.1;}
+  .qty-unit{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+  .row-actions{display:flex;gap:4px;flex-shrink:0;}
+  .icon-btn{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;cursor:pointer;border-radius:8px;color:var(--muted);font-size:14px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .icon-btn:hover{ color:var(--text); background:var(--surface2); }
+  .add-item-btn{
+    display:flex;align-items:center;gap:6px;width:100%;background:transparent;border:none;
+    cursor:pointer;color:var(--amber);font-size:13px;font-weight:600;padding:12px 16px;
+  }
+  .add-section-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);
+    border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted);font-size:13.5px;
+    padding:14px;cursor:pointer;width:100%;font-weight:500;transition: border-color 0.2s, color 0.2s;
+  }
+  .add-section-btn:hover{ border-color:var(--amber); color:var(--amber); }
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .form-label{font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+  .text-input{
+    width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+    padding:10px 12px;color:var(--text);font-size:14px;outline:none;
+    transition: border-color 0.15s ease;
+  }
+  .text-input:focus{ border-color:var(--amber); }
+  .swatch-row{display:flex;gap:12px;}
+  .swatch{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;transition:transform 0.15s ease;}
+  .swatch:hover{ transform:scale(1.1); }
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+  .inline-form{padding:12px 16px 16px;border-top:1px solid var(--border);}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;
+    padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;transition: background 0.15s;
+  }
+  .btn-ghost:hover{ background:var(--surface2); color:var(--text); }
+  .btn-primary{
+    display:flex;align-items:center;gap:6px;
+    background:linear-gradient(135deg, var(--amber) 0%, #D89422 100%);
+    border:none;color:#1A1102;border-radius:10px;padding:10px 18px;
+    font-size:13px;font-weight:700;cursor:pointer;
+    box-shadow: 0 4px 12px rgba(242,176,56,0.25);
+    transition: transform 0.1s ease, box-shadow 0.15s;
+  }
+  .btn-primary:active{ transform:scale(0.98); }
+  .btn-success{
+    background:linear-gradient(135deg, var(--teal) 0%, #2A9672 100%);
+    border:none;color:#041A12;border-radius:10px;padding:10px 18px;
+    font-size:13px;font-weight:700;cursor:pointer;
+    box-shadow: 0 4px 12px rgba(59,185,144,0.25);
+  }
+  .btn-danger{
+    background:linear-gradient(135deg, var(--rust) 0%, #C04332 100%);
+    border:none;color:#240905;border-radius:10px;padding:10px 18px;
+    font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:32px 20px;
+  }
+  .empty-icon{
+    width:48px;height:48px;border-radius:50%;background:var(--surface2);
+    display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+    font-size:22px;border:1px solid var(--border);
+  }
+  .empty-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;margin-bottom:4px;}
+  .empty-body{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5;max-width:280px;}
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;width:100%;max-width:380px;box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  }
+  .modal-title{font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px;}
+  .modal-body{font-size:13px;color:var(--muted);line-height:1.5;}
+  .search-meta{font-size:11.5px;color:var(--muted);padding:4px 2px 8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
   .toolbar{display:flex;align-items:center;gap:8px;margin:0 16px 4px;}
-  .chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:0.5px solid var(--border);
-    border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;}
-  .chip.active{color:var(--rust);border-color:var(--rust);background:rgba(210,96,74,.1);}
+  .chip{
+    display:flex;align-items:center;gap:6px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:999px;padding:7px 14px;
+    font-size:12px;color:var(--muted);cursor:pointer;font-weight:500;
+  }
+  .chip.active{color:var(--rust);border-color:var(--rust);background:rgba(224,90,71,0.15);}
   select.text-input{-webkit-appearance:none;appearance:none;}
-  .toolbar select{background:var(--surface2);border:0.5px solid var(--border);border-radius:999px;
-    color:var(--muted);font-size:12px;padding:6px 10px;outline:none;}
-  .menu-btn{margin-left:auto;width:30px;height:30px;border-radius:8px;border:0.5px solid var(--border);
-    background:var(--surface2);color:var(--muted);cursor:pointer;font-size:15px;}
-  .chart-wrap{margin:12px 16px 2px;background:var(--surface);border:0.5px solid var(--border);
-    border-radius:12px;padding:12px 14px;}
-  .chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;}
-  .chart-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .toolbar select{
+    background:var(--surface2);border:1px solid var(--border);border-radius:999px;
+    color:var(--muted);font-size:12px;padding:7px 12px;outline:none;font-weight:500;
+  }
+  .menu-btn{
+    margin-left:auto;width:32px;height:32px;border-radius:10px;border:1px solid var(--border);
+    background:var(--surface2);color:var(--muted);cursor:pointer;font-size:16px;
+  }
+  .chart-wrap{
+    margin:12px 16px 2px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:14px;
+  }
+  .chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;font-weight:600;}
+  .chart-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
   .chart-row:last-child{margin-bottom:0;}
-  .chart-label{width:90px;flex-shrink:0;font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .chart-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
-  .chart-fill{height:100%;border-radius:4px;}
-  .chart-num{width:22px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
-  .panel-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:12px 0;border-bottom:0.5px solid var(--border);}
+  .chart-label{width:90px;flex-shrink:0;font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+  .chart-track{flex:1;height:9px;background:var(--surface2);border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+  .chart-fill{height:100%;border-radius:6px;}
+  .chart-num{width:24px;text-align:right;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);font-weight:600;}
+  .panel-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 0;border-bottom:1px solid var(--border);
+  }
   .panel-row:last-child{border-bottom:none;}
   .panel-row-text{flex:1;}
-  .panel-row-title{font-size:13px;color:var(--text);margin-bottom:2px;}
-  .panel-row-sub{font-size:11px;color:var(--muted);line-height:1.4;}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);
-    border:0.5px solid var(--border);color:var(--text);font-size:12.5px;padding:9px 16px;border-radius:999px;
-    z-index:100;box-shadow: 0 4px 12px rgba(0,0,0,0.3);}
-  .nav-row{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none;}
+  .panel-row-title{font-size:13.5px;color:var(--text);margin-bottom:2px;font-weight:500;}
+  .panel-row-sub{font-size:11.5px;color:var(--muted);line-height:1.4;}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#23303E;
+    border:1px solid #3A4B5A;color:var(--text);font-size:13px;padding:10px 20px;
+    border-radius:999px;z-index:100;box-shadow: 0 8px 24px rgba(0,0,0,0.4);font-weight:500;
+  }
+  .nav-row{display:flex;gap:8px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none;}
   .nav-row::-webkit-scrollbar{display:none;}
-  .nav-btn{flex:1;min-width:68px;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
-    border-radius:8px;padding:10px 0;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;}
-  .nav-btn.active{background:var(--amber);border-color:var(--amber);color:#241A05;}
-  .bill-wrap{padding:14px 16px 20px;display:flex;flex-direction:column;gap:12px;}
-  .price-tag{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);}
-  .cart-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+  .nav-btn{
+    flex:1;min-width:72px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+    border-radius:10px;padding:10px 0;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-btn.active{
+    background:linear-gradient(135deg, var(--amber) 0%, #D89422 100%);
+    border-color:var(--amber);color:#1A1102;
+    box-shadow: 0 2px 10px rgba(242,176,56,0.25);
+  }
+  .bill-wrap{padding:14px 16px 24px;display:flex;flex-direction:column;gap:14px;}
+  .price-tag{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--teal);font-weight:600;}
+  .cart-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
   .cart-row:last-child{border-bottom:none;}
-  .cart-name{font-size:13px;margin-bottom:2px;}
-  .cart-sub{font-size:11px;color:var(--muted);}
-  .cart-qty-input{width:46px;background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;
-    color:var(--text);font-size:13px;text-align:center;padding:5px 0;}
-  .cart-line-total{width:64px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;flex-shrink:0;}
-  .pick-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer;}
+  .cart-name{font-size:13.5px;margin-bottom:2px;font-weight:500;}
+  .cart-sub{font-size:11.5px;color:var(--muted);}
+  .cart-qty-input{
+    width:50px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-size:13px;text-align:center;padding:6px 0;outline:none;font-weight:600;
+  }
+  .cart-line-total{width:68px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13px;flex-shrink:0;font-weight:600;}
+  .pick-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);}
   .pick-row:last-child{border-bottom:none;}
   .total-row{display:flex;justify-content:space-between;align-items:baseline;padding-top:8px;}
-  .total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
-  .total-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:500;color:var(--amber);}
-  .bill-list-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
-    border-bottom:0.5px solid var(--border);cursor:pointer;}
+  .total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+  .total-value{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--amber);}
+  .bill-list-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+    border-bottom:1px solid var(--border);cursor:pointer;transition: background 0.15s;}
+  .bill-list-row:hover{ background:var(--surface2); }
   .bill-list-row:last-child{border-bottom:none;}
-  .bill-list-date{font-size:12.5px;}
-  .bill-list-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-  .bill-list-total{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);}
-  .shop-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;letter-spacing:.5px;
-    color:var(--amber);margin-bottom:6px;}
-  .badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;}
-  .badge-cash{background:rgba(63,169,138,.2);color:var(--teal);}
-  .badge-upi{background:rgba(78,143,208,.2);color:var(--blue);}
-  .badge-udhar{background:rgba(210,96,74,.2);color:var(--rust);}
-  .pay-btn-group{display:flex;gap:6px;margin-top:6px;}
-  .pay-btn{flex:1;padding:10px 0;background:var(--surface2);border:0.5px solid var(--border);color:var(--muted);
-    border-radius:6px;font-size:12px;cursor:pointer;}
-  .pay-btn.active{border-color:var(--amber);color:var(--amber);background:rgba(227,167,60,.1);}
+  .bill-list-date{font-size:13px;}
+  .bill-list-sub{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .bill-list-total{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--amber);font-weight:600;}
+  .shop-name{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:.5px;
+    color:var(--amber);margin-bottom:2px;}
+  .shop-address{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .badge{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
+  .badge-cash{background:rgba(59,185,144,0.18);color:var(--teal);border:1px solid rgba(59,185,144,0.3);}
+  .badge-upi{background:rgba(74,144,226,0.18);color:var(--blue);border:1px solid rgba(74,144,226,0.3);}
+  .badge-udhar{background:rgba(224,90,71,0.18);color:var(--rust);border:1px solid rgba(224,90,71,0.3);}
+  .pay-btn-group{display:flex;gap:8px;margin-top:6px;}
+  .pay-btn{
+    flex:1;padding:10px 0;background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+    border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;transition: all 0.15s;
+  }
+  .pay-btn.active{border-color:var(--amber);color:var(--amber);background:var(--amber-glow);}
 
   /* RESPONSIVE LAYOUT BREAKPOINTS */
   @media (min-width: 600px) {
@@ -201,7 +320,7 @@
     .bill-grid-desktop {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 20px;
     }
   }
 </style>
@@ -237,9 +356,12 @@ if (CLOUD_SYNC.enabled && CLOUD_SYNC.firebaseConfig) {
 }
 
 const STORAGE_KEY = "stockroom:data:v1";
-const TAB_COLORS = ["#E3A73C","#3FA98A","#D2604A","#4E8FD0","#9A80D6","#A6B24A"];
+const TAB_COLORS = ["#F2B038","#3BB990","#E05A47","#4A90E2","#9A80D6","#A6B24A"];
 const CURRENCY = "₹";
 const SHOP_NAME = "Sanjeev Di Hatti";
+const SHOP_ADDRESS = "Camp cloth market, Moga";
+const SHOP_PHONE = "9888830916";
+
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 function loadData(){
@@ -304,8 +426,10 @@ const state = {
   billDiscount: 0,
   billTax: 0,
   billPayMode: "Cash",
+  cashTendered: 0,
   activeBillId: null,
   custSearch: "",
+  itemAddQty: {}
 };
 
 function sortProducts(list){
@@ -359,7 +483,7 @@ function buildNav(){
 function buildStockView(){
   const frag = el("div",{});
   const searchRow = el("div", {class:"search-row"});
-  const searchInput = el("input", {placeholder:"Search stock…", value: state.search,
+  const searchInput = el("input", {placeholder:"Search stock by full or partial name…", value: state.search,
     oninput: (e)=>{ state.search = e.target.value; render(); }});
   searchRow.append("🔍", searchInput);
   if(state.search) searchRow.append(el("button",{class:"icon-btn", onclick:()=>{state.search="";render();}, text:"✕"}));
@@ -381,9 +505,14 @@ function buildStockView(){
 
   const wrap = el("div", {class:"sections-wrap"});
   if(state.search.trim()){
-    const q = state.search.trim().toLowerCase();
+    const searchTerms = state.search.trim().toLowerCase().split(/\s+/);
     const all = state.data.sections.flatMap(s => s.products.map(p => ({...p, sectionId:s.id, sectionName:s.name, sectionColor:s.color})));
-    const results = sortProducts(filterLow(all.filter(p => p.name.toLowerCase().includes(q))));
+    
+    const results = sortProducts(filterLow(all.filter(p => {
+      const pName = p.name.toLowerCase();
+      return searchTerms.every(term => pName.includes(term));
+    })));
+
     wrap.appendChild(el("div",{class:"search-meta", text:`${results.length} result${results.length===1?"":"s"}`}));
     if(results.length === 0){
       wrap.appendChild(buildEmptyState("🔍","No matches",`Nothing in your stockroom matches "${state.search}".`));
@@ -414,6 +543,7 @@ function allProductsFlat(){
 function buildBillingView(){
   const wrap = el("div",{class:"bill-wrap"});
   wrap.appendChild(el("div",{class:"shop-name", text:SHOP_NAME}));
+  wrap.appendChild(el("div",{class:"shop-address", text:`📍 ${SHOP_ADDRESS} · 📞 ${SHOP_PHONE}`}));
 
   const mainGrid = el("div",{class:"bill-grid-desktop"});
   const col1 = el("div",{style:"display:flex;flex-direction:column;gap:12px"});
@@ -430,9 +560,9 @@ function buildBillingView(){
 
   const matchedCust = getMatchedCustomer();
   if(matchedCust){
-    const custBadge = el("div",{class:"card", style:"padding:8px 12px;background:var(--surface2)"},
-      el("div",{style:"font-size:11.5px;color:var(--muted)"}, `Registered Customer · Lifetime Spend: ${CURRENCY}${getPendingCustomerSpend(matchedCust.phone)}`),
-      matchedCust.pendingUdhar > 0 ? el("div",{style:"font-size:11.5px;color:var(--rust);margin-top:2px;font-weight:600"}, `Pending Udhar Balance: ${CURRENCY}${matchedCust.pendingUdhar.toFixed(2)}`) : null
+    const custBadge = el("div",{class:"card", style:"padding:10px 14px;background:var(--surface2)"},
+      el("div",{style:"font-size:12px;color:var(--muted)"}, `Registered Customer · Lifetime Spend: ${CURRENCY}${getPendingCustomerSpend(matchedCust.phone)}`),
+      matchedCust.pendingUdhar > 0 ? el("div",{style:"font-size:12px;color:var(--rust);margin-top:3px;font-weight:600"}, `Pending Udhar Balance: ${CURRENCY}${matchedCust.pendingUdhar.toFixed(2)}`) : null
     );
     col1.appendChild(custBadge);
   }
@@ -448,26 +578,51 @@ function buildBillingView(){
   });
   col1.appendChild(payGroup);
 
-  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Add Item to Invoice"}));
+  col1.appendChild(el("div",{class:"form-label", style:"margin-top:4px", text:"Search Product to Bill"}));
   const pickWrap = el("div",{class:"search-row", style:"margin:0"});
-  const pickInput = el("input",{placeholder:"Search stock to bill…", value: state.billPicker,
+  const pickInput = el("input",{placeholder:"Type full item name or words…", value: state.billPicker,
     oninput:(e)=>{ state.billPicker = e.target.value; render(); }});
   pickWrap.append("🔍", pickInput);
   col1.appendChild(pickWrap);
 
   if(state.billPicker.trim()){
-    const q = state.billPicker.trim().toLowerCase();
-    const matches = allProductsFlat().filter(p => p.name.toLowerCase().includes(q)).slice(0,8);
+    const searchTerms = state.billPicker.trim().toLowerCase().split(/\s+/);
+    const matches = allProductsFlat().filter(p => {
+      const pName = p.name.toLowerCase();
+      return searchTerms.every(term => pName.includes(term));
+    }).slice(0,8);
+
     const card = el("div",{class:"card", style:"padding:0 14px"});
     if(matches.length === 0){ card.appendChild(el("div",{class:"empty-products", text:"No stock items match."})); }
     else {
       matches.forEach((p,i)=>{
-        const row = el("div",{class:"pick-row", style: i===matches.length-1 ? "border-bottom:none" : "", onclick:()=>addToCart(p)});
+        const customQty = state.itemAddQty[p.id] !== undefined ? state.itemAddQty[p.id] : 1;
+        const row = el("div",{class:"pick-row", style: i===matches.length-1 ? "border-bottom:none" : ""});
+        
         row.appendChild(el("div",{style:"flex:1;min-width:0"},
           el("div",{class:"cart-name", text:p.name}),
           el("div",{class:"cart-sub", text:`${p.sectionName} · ${p.qty} ${p.unit} in stock · ${CURRENCY}${p.price||0}`})
         ));
-        row.appendChild(el("span",{class:"icon-btn", text:"+"}));
+
+        const qtyInput = el("input",{
+          class:"cart-qty-input", 
+          type:"number", 
+          inputmode:"numeric", 
+          value:String(customQty),
+          oninput:(e)=>{ state.itemAddQty[p.id] = Math.max(1, Math.round(Number(e.target.value)||1)); }
+        });
+
+        const addBtn = el("button",{
+          class:"btn-primary", 
+          style:"padding:7px 12px;font-size:12px", 
+          onclick:()=>addToCart(p, state.itemAddQty[p.id] || 1), 
+          text:"+ Add"
+        });
+
+        const actionGroup = el("div",{style:"display:flex;align-items:center;gap:8px;flex-shrink:0"});
+        actionGroup.append(qtyInput, addBtn);
+        row.appendChild(actionGroup);
+
         card.appendChild(row);
       });
     }
@@ -494,7 +649,7 @@ function buildBillingView(){
       card.appendChild(row);
     });
 
-    const grid = el("div",{class:"form-grid", style:"margin-top:10px;border-top:0.5px solid var(--border);padding-top:10px;"});
+    const grid = el("div",{class:"form-grid", style:"margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"});
     grid.appendChild(el("div",{},
       el("div",{class:"form-label", text:"Discount (%)"}),
       el("input",{class:"text-input", type:"number", value:String(state.billDiscount), oninput:(e)=>{ state.billDiscount=Number(e.target.value)||0; render(); }})
@@ -506,31 +661,53 @@ function buildBillingView(){
     card.appendChild(grid);
 
     const calc = getCartTotals();
-    const subtotalRow = el("div",{class:"total-row", style:"margin-top:8px"});
+    const subtotalRow = el("div",{class:"total-row", style:"margin-top:10px"});
     subtotalRow.appendChild(el("div",{class:"total-label", text:"Subtotal"}));
-    subtotalRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:14px;", text:`${CURRENCY}${calc.subtotal.toFixed(2)}`}));
+    subtotalRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;", text:`${CURRENCY}${calc.subtotal.toFixed(2)}`}));
     card.appendChild(subtotalRow);
 
     if(calc.discountAmt > 0){
       const discRow = el("div",{class:"total-row"});
       discRow.appendChild(el("div",{class:"total-label", text:`Discount (${state.billDiscount}%)`}));
-      discRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--rust)", text:`-${CURRENCY}${calc.discountAmt.toFixed(2)}`}));
+      discRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--rust);font-weight:600", text:`-${CURRENCY}${calc.discountAmt.toFixed(2)}`}));
       card.appendChild(discRow);
     }
     if(calc.taxAmt > 0){
       const taxRow = el("div",{class:"total-row"});
       taxRow.appendChild(el("div",{class:"total-label", text:`Tax/GST (${state.billTax}%)`}));
-      taxRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--teal)", text:`+${CURRENCY}${calc.taxAmt.toFixed(2)}`}));
+      taxRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--teal);font-weight:600", text:`+${CURRENCY}${calc.taxAmt.toFixed(2)}`}));
       card.appendChild(taxRow);
     }
 
-    const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);padding-top:8px;margin-top:4px"});
+    const totalRow = el("div",{class:"total-row", style:"border-top:1px solid var(--border);padding-top:10px;margin-top:6px"});
     totalRow.appendChild(el("div",{class:"total-label", text:"Final Invoice Total"}));
     totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${calc.finalTotal.toFixed(2)}`}));
     card.appendChild(totalRow);
-    col2.appendChild(card);
 
-    col2.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:12px 0", onclick:generateBill, text:"Generate Invoice & Update Stock"}));
+    // Cash Change Calculator
+    if(state.billPayMode === "Cash"){
+      const cashWrap = el("div",{style:"margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)"});
+      cashWrap.appendChild(el("div",{class:"form-label", text:"Cash Handed Over"}));
+      cashWrap.appendChild(el("input",{
+        class:"text-input", 
+        type:"number", 
+        placeholder:"0",
+        value: state.cashTendered ? String(state.cashTendered) : "", 
+        oninput:(e)=>{ state.cashTendered = Number(e.target.value)||0; render(); }
+      }));
+
+      if(state.cashTendered > 0){
+        const changeDue = Math.max(0, state.cashTendered - calc.finalTotal);
+        const changeRow = el("div",{class:"total-row", style:"margin-top:8px"});
+        changeRow.appendChild(el("div",{class:"total-label", text:"Change Due Back"}));
+        changeRow.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:16px;color:var(--teal);font-weight:600", text:`${CURRENCY}${changeDue.toFixed(2)}`}));
+        cashWrap.appendChild(changeRow);
+      }
+      card.appendChild(cashWrap);
+    }
+
+    col2.appendChild(card);
+    col2.appendChild(el("button",{class:"btn-primary", style:"width:100%;justify-content:center;padding:13px 0", onclick:generateBill, text:"Generate Invoice & Update Stock"}));
   }
   mainGrid.appendChild(col2);
   wrap.appendChild(mainGrid);
@@ -578,7 +755,7 @@ function buildHistoryView(){
     const payBadgeClass = b.payMode==='Udhar'?'badge-udhar':(b.payMode==='UPI'?'badge-upi':'badge-cash');
     row.appendChild(el("div",{},
       el("div",{class:"bill-list-date"},
-        el("span",{style:"font-weight:600", text:`${b.invoiceNo || "INV"} · `}),
+        el("span",{style:"font-weight:600;color:var(--amber)", text:`${b.invoiceNo || "INV"} · `}),
         el("span",{text: new Date(b.createdAt).toLocaleDateString()+" "}),
         el("span",{class:`badge ${payBadgeClass}`, text: b.payMode || "Cash"})
       ),
@@ -615,7 +792,7 @@ function buildUdharView(){
     ));
     const right = el("div",{style:"display:flex;align-items:center;gap:10px"});
     right.appendChild(el("div",{class:"bill-list-total", style:"color:var(--rust)", text:`${CURRENCY}${b.total.toFixed(2)}`}));
-    right.appendChild(el("button",{class:"btn-success", style:"padding:4px 8px;font-size:11px", onclick:(e)=>{ e.stopPropagation(); markUdharPaid(b.id); }, text:"Settle"}));
+    right.appendChild(el("button",{class:"btn-success", style:"padding:5px 10px;font-size:11px", onclick:(e)=>{ e.stopPropagation(); markUdharPaid(b.id); }, text:"Settle"}));
     row.appendChild(right);
     card.appendChild(row);
   });
@@ -658,9 +835,9 @@ function buildCustomersView(){
     
     const right = el("div",{style:"text-align:right"});
     if(pendingUdhar > 0){
-      right.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--rust);font-weight:600"}, `Udhar: ${CURRENCY}${pendingUdhar.toFixed(2)}`));
+      right.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--rust);font-weight:600"}, `Udhar: ${CURRENCY}${pendingUdhar.toFixed(2)}`));
     } else {
-      right.appendChild(el("div",{style:"font-size:11px;color:var(--teal)"}, "Clear"));
+      right.appendChild(el("div",{style:"font-size:11.5px;color:var(--teal);font-weight:600"}, "Clear"));
     }
     row.appendChild(right);
     card.appendChild(row);
@@ -706,6 +883,38 @@ function buildReportsView(){
   stats.appendChild(buildStat("Invoices", bills.length, false));
   wrap.appendChild(stats);
 
+  // EOD SETTLEMENT EXPORT BUTTON
+  const eodCard = el("div",{class:"card", style:"display:flex;justify-content:space-between;align-items:center;padding:14px 16px"});
+  eodCard.appendChild(el("div",{},
+    el("div",{style:"font-size:14px;font-weight:600;color:var(--text)"}, "End of Day (EOD) Settlement"),
+    el("div",{style:"font-size:11.5px;color:var(--muted);margin-top:2px"}, "Export today's full sales and payment summary to CSV")
+  ));
+  eodCard.appendChild(el("button",{class:"btn-primary", onclick:exportEODSettlement, text:"📥 Export EOD"}));
+  wrap.appendChild(eodCard);
+
+  // PAYMENT METHOD BREAKDOWN CARD
+  const cashSales = bills.filter(b => (b.payMode||'Cash') === 'Cash').reduce((sum, b) => sum + b.total, 0);
+  const upiSales = bills.filter(b => b.payMode === 'UPI').reduce((sum, b) => sum + b.total, 0);
+  const udharSales = bills.filter(b => b.payMode === 'Udhar').reduce((sum, b) => sum + b.total, 0);
+
+  const payCard = el("div",{class:"card"});
+  payCard.appendChild(el("div",{class:"chart-title", text:"Payment Method Breakdown"}));
+  
+  [
+    ["Cash", cashSales, "var(--teal)"],
+    ["UPI", upiSales, "var(--blue)"],
+    ["Udhar (Credit)", udharSales, "var(--rust)"]
+  ].forEach(([mode, amt, color]) => {
+    const row = el("div",{class:"chart-row"});
+    row.appendChild(el("div",{class:"chart-label", text:mode}));
+    const track = el("div",{class:"chart-track"});
+    const pct = totalSales > 0 ? Math.round((amt / totalSales) * 100) : 0;
+    track.appendChild(el("div",{class:"chart-fill", style:`width:${pct}%;background:${color}`}));
+    row.append(track, el("div",{class:"chart-num", style:"width:auto", text:`${CURRENCY}${amt.toFixed(0)} (${pct}%)`}));
+    payCard.appendChild(row);
+  });
+  wrap.appendChild(payCard);
+
   const itemCounts = {};
   bills.forEach(b => {
     (b.items||[]).forEach(it => {
@@ -735,17 +944,70 @@ function buildReportsView(){
   return wrap;
 }
 
+function exportEODSettlement(){
+  const bills = state.data.bills || [];
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayBills = bills.filter(b => b.createdAt >= startOfDay);
+
+  if(todayBills.length === 0){
+    showToast("No sales transactions recorded today.");
+    return;
+  }
+
+  const todaySales = todayBills.reduce((sum, b) => sum + b.total, 0);
+  const cashSales = todayBills.filter(b => (b.payMode||'Cash') === 'Cash').reduce((sum, b) => sum + b.total, 0);
+  const upiSales = todayBills.filter(b => b.payMode === 'UPI').reduce((sum, b) => sum + b.total, 0);
+  const udharSales = todayBills.filter(b => b.payMode === 'Udhar').reduce((sum, b) => sum + b.total, 0);
+
+  const rows = [
+    ["END OF DAY (EOD) SETTLEMENT REPORT"],
+    ["Shop Name", SHOP_NAME],
+    ["Address", SHOP_ADDRESS],
+    ["Contact", SHOP_PHONE],
+    ["Report Date", new Date().toLocaleDateString()],
+    [],
+    ["SUMMARY METRICS"],
+    ["Total Transactions", todayBills.length],
+    ["Total Daily Revenue", todaySales.toFixed(2)],
+    ["Cash Revenue", cashSales.toFixed(2)],
+    ["UPI Revenue", upiSales.toFixed(2)],
+    ["Udhar (Credit) Revenue", udharSales.toFixed(2)],
+    [],
+    ["TRANSACTION DETAILS"],
+    ["Invoice No", "Time", "Customer Name", "Phone", "Payment Mode", "Items Count", "Total Amount"]
+  ];
+
+  todayBills.forEach(b => {
+    rows.push([
+      b.invoiceNo || b.id,
+      new Date(b.createdAt).toLocaleTimeString(),
+      b.customer || "Walk-in Customer",
+      b.phone || "",
+      b.payMode || "Cash",
+      b.items.length,
+      b.total.toFixed(2)
+    ]);
+  });
+
+  const csv = rows.map(r => r.map(csvEscape).join(",")).join("\n");
+  const filename = `EOD-Settlement-${now.toISOString().slice(0,10)}.csv`;
+  downloadFile(filename, csv, "text/csv");
+  showToast("EOD Settlement Report exported");
+}
+
 function buildBillDetail(bill){
   const wrap = el("div",{class:"bill-wrap"});
   wrap.appendChild(el("button",{class:"btn-ghost", onclick:()=>{ state.activeBillId=null; render(); }, text:"← Back"}));
   const card = el("div",{class:"card"});
   card.appendChild(el("div",{class:"shop-name", style:"margin-bottom:2px", text:SHOP_NAME}));
-  card.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--amber);margin-bottom:4px;font-weight:600", text:`Invoice: ${bill.invoiceNo || 'INV'}`}));
+  card.appendChild(el("div",{class:"shop-address", text:`📍 ${SHOP_ADDRESS} · 📞 ${SHOP_PHONE}`}));
+  card.appendChild(el("div",{style:"font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);margin-bottom:4px;font-weight:600", text:`Invoice: ${bill.invoiceNo || 'INV'}`}));
   card.appendChild(el("div",{class:"panel-row-sub", text: new Date(bill.createdAt).toLocaleString()}));
   card.appendChild(el("div",{class:"panel-row-sub", style:"margin-top:2px", text: `Customer: ${bill.customer || "Walk-in customer"} (${bill.payMode || "Cash"})`}));
   if(bill.phone) card.appendChild(el("div",{class:"panel-row-sub", text: `Phone: ${bill.phone}`}));
 
-  const itemsWrap = el("div",{style:"margin-top:12px;border-top:0.5px solid var(--border)"});
+  const itemsWrap = el("div",{style:"margin-top:12px;border-top:1px solid var(--border)"});
   bill.items.forEach(it=>{
     const row = el("div",{class:"cart-row"});
     row.appendChild(el("div",{style:"flex:1;min-width:0"},
@@ -757,13 +1019,13 @@ function buildBillDetail(bill){
   });
   card.appendChild(itemsWrap);
 
-  const totalRow = el("div",{class:"total-row", style:"border-top:0.5px solid var(--border);margin-top:8px;"});
+  const totalRow = el("div",{class:"total-row", style:"border-top:1px solid var(--border);margin-top:8px;"});
   totalRow.appendChild(el("div",{class:"total-label", text:"Grand Total"}));
   totalRow.appendChild(el("div",{class:"total-value", text:`${CURRENCY}${bill.total.toFixed(2)}`}));
   card.appendChild(totalRow);
   wrap.appendChild(card);
 
-  const actions = el("div",{style:"display:flex;gap:8px"});
+  const actions = el("div",{style:"display:flex;gap:10px"});
   actions.appendChild(el("button",{class:"btn-success", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>shareWhatsApp(bill), text:"📱 WhatsApp Receipt"}));
   actions.appendChild(el("button",{class:"btn-primary", style:"flex:1;justify-content:center;padding:12px 0", onclick:()=>printBill(bill), text:"🖨 Print Invoice"}));
   wrap.appendChild(actions);
@@ -772,6 +1034,8 @@ function buildBillDetail(bill){
 
 function shareWhatsApp(bill){
   let text = `*Tax Invoice from ${SHOP_NAME}*\n`;
+  text += `📍 ${SHOP_ADDRESS}\n`;
+  text += `📞 Contact: ${SHOP_PHONE}\n\n`;
   text += `Invoice No: ${bill.invoiceNo || 'INV'}\n`;
   text += `Date: ${new Date(bill.createdAt).toLocaleDateString()}\n`;
   text += `Customer: ${bill.customer || "Valued Customer"}\n\n`;
@@ -789,18 +1053,30 @@ function shareWhatsApp(bill){
   window.open(url, "_blank");
 }
 
-function addToCart(product){
+function addToCart(product, qtyToAdd = 1){
   state.billPicker = "";
-  const existing = state.cart.find(c=>c.productId===product.id);
-  if(existing){ existing.qty += 1; }
-  else {
+  const qty = Math.max(1, Math.round(Number(qtyToAdd)||1));
+  
+  // CONSOLIDATE DUPLICATE ITEMS
+  const existing = state.cart.find(c => c.productId === product.id);
+  if(existing){ 
+    existing.qty += qty; 
+  } else {
     state.cart.push({
-      productId: product.id, sectionId: product.sectionId, name: product.name,
-      unit: product.unit, price: product.price||0, qty: 1, stockQty: product.qty,
+      productId: product.id, 
+      sectionId: product.sectionId, 
+      name: product.name,
+      unit: product.unit, 
+      price: product.price||0, 
+      qty: qty, 
+      stockQty: product.qty,
     });
   }
+  
+  state.itemAddQty[product.id] = 1;
   render();
 }
+
 function setCartQty(index, value){
   const qty = Math.max(1, Math.round(Number(value)||1));
   state.cart[index].qty = qty;
@@ -845,7 +1121,8 @@ function generateBill(){
     subtotal: totals.subtotal,
     discount: state.billDiscount,
     tax: state.billTax,
-    total: totals.finalTotal
+    total: totals.finalTotal,
+    cashTendered: state.billPayMode === "Cash" ? state.cashTendered : 0
   };
 
   state.cart.forEach(c=>{
@@ -877,6 +1154,7 @@ function generateBill(){
   state.billPhone = "";
   state.billDiscount = 0;
   state.billTax = 0;
+  state.cashTendered = 0;
   state.activeBillId = bill.id;
   state.view = "history";
   showToast(`Invoice ${invoiceNo} generated`);
@@ -887,6 +1165,7 @@ function printBill(bill){
   const rows = bill.items.map(it=>
     `<tr><td>${it.name}</td><td style="text-align:center">${it.qty} ${it.unit}</td><td style="text-align:right">${CURRENCY}${it.price}</td><td style="text-align:right">${CURRENCY}${(it.qty*it.price).toFixed(2)}</td></tr>`
   ).join("");
+  
   win.document.write(`
     <html><head><title>Invoice — ${SHOP_NAME}</title><style>
       body{font-family:sans-serif;padding:24px;color:#111;}
@@ -897,7 +1176,8 @@ function printBill(bill){
       .total{font-size:16px;font-weight:bold;text-align:right;margin-top:12px;}
     </style></head><body>
       <h1>${SHOP_NAME}</h1>
-      <h2>TAX INVOICE (${bill.invoiceNo || 'INV'})</h2>
+      <div class="muted">📍 ${SHOP_ADDRESS} · 📞 ${SHOP_PHONE}</div>
+      <h2 style="margin-top:10px">TAX INVOICE (${bill.invoiceNo || 'INV'})</h2>
       <div class="muted">Date: ${new Date(bill.createdAt).toLocaleString()}</div>
       <div class="muted">Payment Method: ${bill.payMode || "Cash"}</div>
       <div class="muted">Customer: ${bill.customer || "Walk-in customer"}${bill.phone ? " · "+bill.phone : ""}</div>
@@ -936,7 +1216,10 @@ function buildHeader(){
     el("div",{class:"brand-mark", text:"SD"}),
     el("div",{},
       el("div",{class:"brand-title", text:SHOP_NAME}),
-      el("div",{class:"brand-sub", text:"stock & billing"})
+      el("div",{class:"brand-sub"}, 
+        el("span",{text:`📍 ${SHOP_ADDRESS}`}),
+        el("span",{text:`· 📞 ${SHOP_PHONE}`})
+      )
     )
   );
   const stats = el("div",{class:"stats-row"},
